@@ -3,38 +3,45 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         xmlns:local="clr-namespace:MCNPFileEditor"
         mc:Ignorable="d"
         Title="MainWindow" Height="422" Width="594">
+    <Window.Resources>
+        <cm:BackgroundWorker x:Key="backgroundworker" 
+                             WorkerReportsProgress="True" WorkerSupportsCancellation="True" 
+                             DoWork="BackgroundWorker_DoWork" ProgressChanged="BackgroundWorker_ProgressChanged" RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="45*"/>
-            <ColumnDefinition Width="495*"/>
-            <ColumnDefinition Width="46*"/>
+            <ColumnDefinition Width="365*"/>
+            <ColumnDefinition Width="176*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="110*"/>
-            <RowDefinition Height="245*"/>
+            <RowDefinition Height="150*"/>
+            <RowDefinition Height="100*"/>
             <RowDefinition Height="45*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Grid.Row="1">
             <Border BorderThickness="1" BorderBrush="Gray" SnapsToDevicePixels="True">
                 <StackPanel Orientation="Horizontal">
-                    <Button Height="70" Width="70" Margin="10">Open</Button>
-                    <Button Height="70" Width="70" Margin="10">Import</Button>
+                    <Button Height="70" Width="70" Margin="10" Click="Button_Click">打开</Button>
+                    <Button Height="70" Width="70" Margin="10" Click="Button_Click_1">添加</Button>
+                    <Button Height="70" Width="70" Margin="10" Click="Button_Click_3">显示</Button>
                 </StackPanel>
             </Border>
         </Grid>
 
-        <Grid Grid.Column="1" Grid.Row="1" Margin="10">
+        <Grid Grid.Column="1" Grid.Row="0" Margin="10">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                    <Label MinWidth="100">FILL = </Label>
-                    <TextBox MinWidth="200" VerticalContentAlignment="Center">666</TextBox>
+                    <Label MinWidth="100">FILL =</Label>
+                    <TextBox MinWidth="200" VerticalContentAlignment="Center" Background="White" x:Name="RepCellIndexTextBox">666</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                    <Label MinWidth="100">处理方式: </Label>
+                    <Label MinWidth="100">处理方式:</Label>
                     <ComboBox MinWidth="200" x:Name="ProcessMode">
                         <ComboBox.Items>
                             <ComboBoxItem>简单方式</ComboBoxItem>
@@ -45,17 +52,22 @@
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                     <Label MinWidth="100">器官名称列表:</Label>
                     <Border BorderBrush="Gray" BorderThickness="0.7" MinWidth="200" SnapsToDevicePixels="True">
-                        <Label x:Name="OrgannameFile"></Label>
+                        <Label x:Name="OrgannameFile" Content="{Binding}"></Label>
                     </Border>
-                    <Button MinWidth="25">...</Button>
+                    <Button MinWidth="25" Click="Button_Click_2">...</Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <Label MinWidth="100">自动删除重复</Label>
+                    <CheckBox IsChecked="True" x:Name="AutoDeleteRepeatCheckBox" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <Label MinWidth="100">统一器官颜色表</Label>
+                    <CheckBox IsChecked="True" x:Name="UniformOrganColorListCheckBox" VerticalAlignment="Center"/>
                 </StackPanel>
             </StackPanel>
 
             <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                <StackPanel>
-                    <ProgressBar MinWidth="70" MinHeight="10"></ProgressBar>
-                    <Label x:Name="ProcessStatus" FontSize="8">准备状态</Label>
-                </StackPanel>
+                <StackPanel/>
             </Grid>
         </Grid>
 
@@ -65,5 +77,18 @@
                 <Label FontSize="8">CRMP, USTC</Label>
             </StackPanel>
         </Border>
+
+        <Grid Grid.Column="2">
+            <ListView Margin="5" x:Name="SelectedFileListView">
+                <ListView.View>
+                    <GridView>
+                        <GridView.Columns>
+                            <GridViewColumn Header="选定文件列表" DisplayMemberBinding="{Binding}"></GridViewColumn>
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Calendar Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" Margin="4"></Calendar>
     </Grid>
 </Window>

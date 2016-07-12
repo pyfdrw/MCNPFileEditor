@@ -1,0 +1,48 @@
+﻿<Window x:Class="MCNPFileEditor.CrossSectionImageShow.CrossSectionSelectedOrganInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MCNPFileEditor.CrossSectionImageShow"
+        mc:Ignorable="d"
+        Title="鼠标位置器官信息" Height="297" Width="219">
+    <Window.Resources>
+        <local:ColorToSolidBrushConvert x:Key="ctsb"/>
+    </Window.Resources>
+    <Grid Margin="10">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>截面类型:</Label>
+                <Label Content="{Binding CrossSectionType}" x:Name="CrossSectionTypeLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>器官编号: </Label>
+                <Label Content="{Binding OrganIndex, UpdateSourceTrigger=PropertyChanged}" x:Name="OrganIndexLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>材料编号:</Label>
+                <Label Content="{Binding MaterialIndex, UpdateSourceTrigger=PropertyChanged}" x:Name="MaterialIndexLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>材料密度:</Label>
+                <Label Content="{Binding MaterialDensity}" x:Name="MaterialDensityLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>器官名称:</Label>
+                <Label Content="{Binding OrganName}" x:Name="OrganNameLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>颜色表示:</Label>
+                <Label MinWidth="80" MinHeight="25" Background="{Binding OrganColor, Converter={StaticResource ctsb}}" x:Name="OrganColorLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>鼠标坐标X:</Label>
+                <Label Content="{Binding Path=MouseLocationX}" x:Name="MouseLocationXLabel"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>鼠标坐标Y:</Label>
+                <Label Content="{Binding Path=MouseLocationY}" x:Name="MouseLocationYLabel"></Label>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

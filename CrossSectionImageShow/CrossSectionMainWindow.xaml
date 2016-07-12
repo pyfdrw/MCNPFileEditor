@@ -1,0 +1,215 @@
+﻿<Window x:Class="MCNPFileEditor.CrossSectionImageShow.CrossSectionMainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MCNPFileEditor.CrossSectionImageShow"
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
+        xmlns:prop="clr-namespace:MCNPFileEditor.Properties"
+        mc:Ignorable="d"
+        Title="CrossSectionMainWindow" Height="768" Width="1365">
+    <Window.Resources>
+        <cm:BackgroundWorker x:Key="backgroundWorker" DoWork="BackgroundWorker_DoWork" RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted" />
+        <local:ColorToSolidBrushConvert x:Key="ctbconvert"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="8*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="8*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="体模列表" Margin="5">
+                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinHeight="30" MinWidth="200" x:Name="PhantomCollectionComboBox" SelectionChanged="PhantomCollectionComboBox_SelectionChanged">
+                </ComboBox>
+            </GroupBox>
+
+
+            <GroupBox Grid.Column="1" Header="选定器官" x:Name="SelectedOrganGroupBox" Margin="5">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label HorizontalContentAlignment="Center" VerticalAlignment="Center">器官编号:</Label>
+                        <Label HorizontalContentAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" MinWidth="100" x:Name="SelectedOrganIndexLabel"  Content="{Binding CellIndex}"></Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" >
+                        <Label HorizontalContentAlignment="Center" VerticalAlignment="Center" >器官颜色:</Label>
+                        <Label Margin="5,0,0,0" MinWidth="100" x:Name="SelectedOrganColorLabel" Background="{Binding CellColor, Converter={StaticResource ctbconvert}}"></Label>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            
+            <TabControl x:Name="tabControl" Grid.Column="2">
+                <TabItem Header="勾画工具">
+                    <Grid Background="#FFE5E5E5">
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox x:Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Center" MinHeight="20" MinWidth="200" SelectionChanged="comboBox_SelectionChanged" >
+                                <ComboBox.Items>
+                                    <ComboBoxItem>点</ComboBoxItem>
+                                    <ComboBoxItem>矩形</ComboBoxItem>
+                                    <ComboBoxItem>多边形</ComboBoxItem>
+                                    <ComboBoxItem>圆</ComboBoxItem>
+                                    <ComboBoxItem>清除选择</ComboBoxItem>
+                                </ComboBox.Items>
+                            </ComboBox>
+                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center">几何检查</Button>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="测量工具">
+                    <Grid Background="#FFE5E5E5">
+                        <WrapPanel>
+                            <Button Margin="5" Click="Button_Click">距离</Button>
+                            <Button Margin="5">体积</Button>
+                            <Button Margin="5">面积</Button>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <Border Grid.Row="1" BorderThickness="2" BorderBrush="Black">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
+
+                <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWE" Background="Black"/>
+                <GridSplitter Grid.Column="3" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWE" Background="Black"/>
+
+                <GroupBox Header="器官列表" Margin="5">
+                    <ListView x:Name="SelectedPhantomCellinfoListView" ListViewItem.MouseDoubleClick="SelectedPhantomCellinfoListView_MouseDoubleClick">
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CellIndex}">器官编号</GridViewColumn>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=MaterialIndex}">材料编号</GridViewColumn>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=DensityValue}">材料密度</GridViewColumn>
+                                    <GridViewColumn Header="表示颜色">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Label MinHeight="30" MinWidth="60" Background="{Binding Path=CellColor, Converter={StaticResource ctbconvert}}"></Label>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=OrganName}">器官名称</GridViewColumn>
+                                </GridView.Columns>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </GroupBox>
+
+                <Grid Grid.Column="2">
+                    <Viewbox Margin="5">
+                        <Canvas x:Name="TransverseCanvas" MouseWheel="TransverseCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="TransverseCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="TransverseCanvas_PreviewKeyDown">
+                            <Image x:Name="TransverseImage">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <MatrixTransform x:Name="TransverseMatrixTransform"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Canvas>
+                    </Viewbox>
+                    
+                    <StackPanel x:Name="TransverseInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Hide" Click="MenuItem_Click" ></MenuItem>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+                        <StackPanel Orientation="Horizontal">
+                            <Label>Now/Total: </Label>
+                            <Label x:Name="nowSliceTransLabel" MinWidth="30" Content="{Binding Path=TransverseNowSliceNum, UpdateSourceTrigger=PropertyChanged}"></Label>
+                            <Label>/</Label>
+                            <Label x:Name="maxSliceTransLabel" MinWidth="30" Content="{Binding Path=TransverseTotalSliceNum}"></Label>
+                        </StackPanel>
+                        <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                            <Image x:Name="TransverseCoordImage" ></Image>
+                        </Viewbox>
+                        
+                    </StackPanel>
+                </Grid>
+                
+                <Grid Grid.Column="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+
+                    <GridSplitter Height="3" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black" />
+
+                    <Grid>
+                        <Viewbox>
+                            <Canvas x:Name="FrontalCanvas" MouseWheel="FrontalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="FrontalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="FrontalCanvas_PreviewKeyDown">
+                                <Image x:Name="FrontalImage">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <MatrixTransform x:Name="FrontalMatrixTransform"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Canvas>
+                        </Viewbox>
+                        <StackPanel x:Name="FrontalInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <StackPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Hide" Click="MenuItem_Click_1" ></MenuItem>
+                                </ContextMenu>
+                            </StackPanel.ContextMenu>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Now/Total:</Label>
+                                <Label x:Name="nowSliceFrontLabel" MinWidth="30" Content="{Binding FrontalNowSliceNum}"></Label>
+                                <Label>/</Label>
+                                <Label x:Name="maxSliceFrontLabel" MinWidth="30" Content="{Binding FrontalTotalSliceNum}"></Label>
+                            </StackPanel>
+                            <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                                <Image x:Name="FrontalCoordImage"></Image>
+                            </Viewbox>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <Viewbox>
+                            <Canvas x:Name="SagittalCanvas" MouseWheel="SagittalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="SagittalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="SagittalCanvas_PreviewKeyDown">
+                                <Image x:Name="SagittalImage">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <MatrixTransform x:Name="SagittalMatrixTransform"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Canvas>
+                        </Viewbox>
+                        <StackPanel x:Name="SagittalInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <StackPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Hide" Click="MenuItem_Click_2" ></MenuItem>
+                                </ContextMenu>
+                            </StackPanel.ContextMenu>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Now/Total:</Label>
+                                <Label x:Name="nowSliceSagittalLabel" MinWidth="30" Content="{Binding SagittalNowSliceNum}"></Label>
+                                <Label>/</Label>
+                                <Label x:Name="maxSliceSagittalLabel" MinWidth="30" Content="{Binding SagittalTotalSliceNum}"></Label>
+                            </StackPanel>
+                            <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                                <Image x:Name="SagittalCoordImage"></Image>
+                            </Viewbox>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+        
+    </Grid>
+</Window>
