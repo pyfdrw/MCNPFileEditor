@@ -42,7 +42,7 @@ namespace MCNPFileEditor.DataClassAndControl
             }
             for (int i = 0; i < thePhantomsCollection.AllPhantoms.Count; i++)
             {
-                if (thePhantomsCollection.AllPhantoms.Where(x=>(x.PhantomName.Equals(thePhantomsCollection.AllPhantoms[i].PhantomName) && x != thePhantomsCollection.AllPhantoms[i])).ToList().Any())
+                if (thePhantomsCollection.AllPhantoms.Where(x => (x.PhantomName.Equals(thePhantomsCollection.AllPhantoms[i].PhantomName) && x != thePhantomsCollection.AllPhantoms[i])).ToList().Any())
                 {
                     thePhantomsCollection.AllPhantoms.RemoveAt(i);
                     i--;
@@ -73,7 +73,7 @@ namespace MCNPFileEditor.DataClassAndControl
                             }
                         }
                     }
-                    
+
                 }
             }
         }
@@ -156,6 +156,7 @@ namespace MCNPFileEditor.DataClassAndControl
 
         // 所有手绘的靶区边界集合
         // 三个截面
+        // 不同的是索引是从1开始的
         public SketchCollInASlice[] SketchCollForAllTransverse;
         public SketchCollInASlice[] SketchCollForAllFrontal;
         public SketchCollInASlice[] SketchCollForAllSagittal;
@@ -406,6 +407,260 @@ namespace MCNPFileEditor.DataClassAndControl
                 SketchCollForAllTransverse[i] = new SketchCollInASlice();
                 SketchCollForAllFrontal[i] = new SketchCollInASlice();
                 SketchCollForAllSagittal[i] = new SketchCollInASlice();
+            }
+        }
+
+        public void ClearSketchCollForAll()
+        {
+            if (SketchCollForAllTransverse != null)
+            {
+                foreach (var item in SketchCollForAllTransverse)
+                {
+                    if (item.sketchInfoColl != null)
+                    {
+                        item.sketchInfoColl.Clear();
+                    }
+                }
+            }
+
+            if (SketchCollForAllFrontal != null)
+            {
+                foreach (var item in SketchCollForAllFrontal)
+                {
+                    if (item.sketchInfoColl != null)
+                    {
+                        item.sketchInfoColl.Clear();
+                    }
+                }
+            }
+
+            if (SketchCollForAllSagittal != null)
+            {
+                foreach (var item in SketchCollForAllSagittal)
+                {
+                    if (item.sketchInfoColl != null)
+                    {
+                        item.sketchInfoColl.Clear();
+                    }
+                }
+            }
+        }
+
+        public void MoveOrgan(List<int> OrgansTobeMove, string organsMoveDirection, int organsMoceDis, int additionOrgan, bool shouldForceReplace)
+        {
+            if (OrgansTobeMove == null || (organsMoveDirection != "X" && organsMoveDirection != "Y" && organsMoveDirection != "Z"))
+            {
+                return;
+            }
+
+            int[,,] cellTempMatrix = new int[RepeatStructureInAPhantom.DimZ, RepeatStructureInAPhantom.DimY, RepeatStructureInAPhantom.DimX]; // 暂存需要替换的体素
+            for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+            {
+                for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                {
+                    for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                    {
+                        cellTempMatrix[i, j, k] = -1;
+                    }
+                }
+            }
+
+            // 找到所有需要替换的元素位置，并沿着organsMoveDirection正方向平移organsMoceDis像素
+            for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+            {
+                for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                {
+                    for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                    {
+                        // RepeatStructureInAPhantom.RepeatMatrix[i,j,k]
+                        if (OrgansTobeMove.Find(x => x == RepeatStructureInAPhantom.RepeatMatrix[i, j, k]) == (RepeatStructureInAPhantom.RepeatMatrix[i, j, k]))
+                        {
+                            // cellTempMatrix[i, j, k] = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                            if (organsMoveDirection == "X")
+                            {
+                                if ((k + organsMoceDis) < RepeatStructureInAPhantom.DimX && (k + organsMoceDis) >= 0)
+                                {
+                                    cellTempMatrix[i, j, k + organsMoceDis] = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                }
+                            }
+                            else if (organsMoveDirection == "Y")
+                            {
+                                if ((j + organsMoceDis) < RepeatStructureInAPhantom.DimY && (j + organsMoceDis) >= 0)
+                                {
+                                    cellTempMatrix[i, j + organsMoceDis, k] = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                }
+                            }
+                            else if (organsMoveDirection == "Z")
+                            {
+                                if ((i + organsMoceDis) < RepeatStructureInAPhantom.DimZ && (i + organsMoceDis) >= 0)
+                                {
+                                    cellTempMatrix[i + organsMoceDis, j, k] = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                }
+                            }
+                            RepeatStructureInAPhantom.RepeatMatrix[i, j, k] = (short)additionOrgan;
+                        }
+                    }
+                }
+            }
+
+            // 不同替换方式
+            if (shouldForceReplace)
+            {
+                for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                {
+                    for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                    {
+                        for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                        {
+                            if (cellTempMatrix[i, j, k] != -1)
+                            {
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] = (short) cellTempMatrix[i, j, k];
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                {
+                    for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                    {
+                        for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                        {
+                            if (cellTempMatrix[i, j, k] != -1 && (RepeatStructureInAPhantom.RepeatMatrix[i, j, k] == 119 || RepeatStructureInAPhantom.RepeatMatrix[i, j, k] == 150))
+                            {
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] = (short)cellTempMatrix[i, j, k];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void OutPutPhantom(string outputfilePath)
+        {
+            if (outputfilePath != null && outputfilePath != "" && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+                RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
+            {
+                using (var fs = new FileStream(outputfilePath, FileMode.Create))
+                {
+                    StreamWriter sw = new StreamWriter(fs);
+
+                    sw.WriteLine(outputfilePath);
+                    sw.WriteLine("C * *****************************************************************************");
+                    sw.WriteLine("C                               Cells cards");
+                    sw.WriteLine("C * *****************************************************************************");
+                    sw.WriteLine("888   0  2                          $ exterior - zero importance");
+                    sw.WriteLine("555   0 - 2     fill = 666            $ Others phantom box");
+                    sw.WriteLine("C * ***************Image data start from here*******************************");
+                    sw.Write("C Voxel size : ");
+                    sw.Write(RepeatStructureInAPhantom.ResolutionX.ToString("f3").PadLeft(7) + " X " +
+                        RepeatStructureInAPhantom.ResolutionY.ToString("f3").PadLeft(7) + " X " +
+                        RepeatStructureInAPhantom.ResolutionZ.ToString("f3").PadLeft(7) + Environment.NewLine);
+                    sw.Write("C Voxel size : ");
+                    sw.Write(RepeatStructureInAPhantom.DimX.ToString("f3").PadLeft(7) + " " +
+                        RepeatStructureInAPhantom.DimY.ToString("f3").PadLeft(7) + " " +
+                        RepeatStructureInAPhantom.DimZ.ToString("f3").PadLeft(7) + Environment.NewLine);
+                    sw.Write("666   0 -1 lat=1 u=666 fill=");
+                    sw.Write(RepeatStructureInAPhantom.LowerBoundX.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundX.ToString() + " " +
+                        RepeatStructureInAPhantom.LowerBoundY.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundY.ToString() + " " +
+                        RepeatStructureInAPhantom.LowerBoundZ.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundZ.ToString() + Environment.NewLine);
+                    int lastVoxel = -1;
+                    int samevoxelcount = 0;
+                    string newline = "     ";
+
+                    for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                    {
+                        for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                        {
+                            for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                            {
+                                if (RepeatStructureInAPhantom.RepeatMatrix[i, j, k] == lastVoxel)
+                                {
+                                    lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                    samevoxelcount++;
+                                }
+                                else
+                                {
+                                    // 新的体素
+                                    if (samevoxelcount == 0)
+                                    {
+                                        newline += (RepeatStructureInAPhantom.RepeatMatrix[i, j, k].ToString() + " ");
+                                        CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                        lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    }
+                                    else
+                                    {
+                                        CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                        newline += (samevoxelcount.ToString() + "r ");
+                                        samevoxelcount = 0;
+                                        newline += (RepeatStructureInAPhantom.RepeatMatrix[i, j, k].ToString() + " ");
+                                        lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    }
+                                    // 一行不要超过80字符
+                                    if (newline.Length >= 69)
+                                    {
+                                        sw.Write(newline + Environment.NewLine);
+                                        newline = "     ";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (samevoxelcount != 0)
+                    {
+                        newline += (" " + samevoxelcount.ToString() + "r");
+                    }
+                    if (newline != null && newline != "     ")
+                    {
+                        sw.Write(newline + Environment.NewLine);
+                        newline = "";
+                    }
+
+                    foreach (var item in CellsCollectionInAPhantom.AllCells)
+                    {
+                        if (item == null)
+                        {
+                            continue;
+                        }
+                        if (item.MaterialIndex == 0)
+                        {
+                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + "          " + item.SurfaceComposation.ToString("d").PadRight(5) +
+                                "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
+                                "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
+                                "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                        }
+                        else
+                        {
+                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + item.DensityValue.ToString("f6").PadRight(10) +
+                                item.SurfaceComposation.ToString("d").PadRight(5) +
+                                "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
+                                "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
+                                "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                        }
+                    }
+
+                    //surface
+                    sw.Write(Environment.NewLine);
+                    sw.Write("C ******************************************************************************" + Environment.NewLine);
+                    sw.Write("C                               Surface cards" + Environment.NewLine);
+                    sw.Write("C ******************************************************************************" + Environment.NewLine);
+                    sw.Write("1    rpp ");
+                    sw.Write(0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionX.ToString("f2").PadRight(6, ' ') +
+                        0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionY.ToString("f2").PadRight(6, ' ') +
+                        0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionZ.ToString("f2").PadRight(6, ' '));
+                    sw.Write("  $ Voxel size" + Environment.NewLine);
+                    sw.Write("2    rpp ");
+                    sw.Write(0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX).ToString("f2").PadRight(6, ' ') +
+                        0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY).ToString("f2").PadRight(6, ' ') +
+                        0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimZ * RepeatStructureInAPhantom.ResolutionZ).ToString("f2").PadRight(6, ' '));
+                    sw.Write("  $ Box" + Environment.NewLine);
+                    sw.Write("3    pz  -1e2    $ XY plane used in universe definition");
+                    sw.Flush();
+                    sw.Close();
+                }
             }
         }
     }
@@ -802,6 +1057,9 @@ namespace MCNPFileEditor.DataClassAndControl
             }
         }
 
+        // 出现次数统计
+        public int NumSum = 0;
+
         /// <summary>
         /// 构造函数
         /// 从一行字符串得到该cell信息
@@ -858,7 +1116,7 @@ namespace MCNPFileEditor.DataClassAndControl
         }
     }
 
-    // 一层Mash的集合
+    // 一层Mask的集合
     // 层数按照集合的索引来
     public class SketchCollInASlice
     {

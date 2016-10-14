@@ -356,6 +356,95 @@ namespace MCNPFileEditor.CrossSectionImageShow
             }
         }
 
+        private void MenuItem_Click_3(object sender, RoutedEventArgs e)
+        {
+            InputJumpNum newInputJumpNumWindow = new InputJumpNum();
+            newInputJumpNumWindow.ShowDialog();
+
+            if (newInputJumpNumWindow.isFullOperation)
+            {
+                if (newInputJumpNumWindow.NUM <= 0)
+                {
+                    newInputJumpNumWindow.NUM = 1;
+                }
+                else
+                {
+                    newInputJumpNumWindow.NUM = newInputJumpNumWindow.NUM >= selectedCrossSection.TransverseTotalSliceNum ? selectedCrossSection.TransverseTotalSliceNum : newInputJumpNumWindow.NUM;
+                }
+
+                selectedCrossSection.TransverseNowSliceNum = newInputJumpNumWindow.NUM;
+                selectedCrossSection.RefreshImage("Transverse");
+
+                RefreshSliceLabelNum();
+
+                SavePreviousInfo("Transverse");
+
+                RestoreInitialSketchPara("Transverse");
+                selectedCrossSection.RefreshSketch("Transverse");
+                DelteAllPolygon(TransverseCanvas);
+                RefreshCanvasSketch("Transverse");
+            }
+        }
+
+        private void MenuItem_Click_4(object sender, RoutedEventArgs e)
+        {
+            InputJumpNum newInputJumpNumWindow = new InputJumpNum();
+            newInputJumpNumWindow.ShowDialog();
+
+            if (newInputJumpNumWindow.isFullOperation)
+            {
+                if (newInputJumpNumWindow.NUM <= 0)
+                {
+                    newInputJumpNumWindow.NUM = 1;
+                }
+                else
+                {
+                    newInputJumpNumWindow.NUM = newInputJumpNumWindow.NUM >= selectedCrossSection.FrontalTotalSliceNum ? selectedCrossSection.FrontalTotalSliceNum : newInputJumpNumWindow.NUM;
+                }
+
+                selectedCrossSection.FrontalNowSliceNum = newInputJumpNumWindow.NUM;
+                selectedCrossSection.RefreshImage("Frontal");
+
+                RefreshSliceLabelNum();
+
+                SavePreviousInfo("Frontal");
+
+                RestoreInitialSketchPara("Frontal");
+                selectedCrossSection.RefreshSketch("Frontal");
+                DelteAllPolygon(FrontalCanvas);
+                RefreshCanvasSketch("Frontal");
+            }
+        }
+
+        private void MenuItem_Click_5(object sender, RoutedEventArgs e)
+        {
+            InputJumpNum newInputJumpNumWindow = new InputJumpNum();
+            newInputJumpNumWindow.ShowDialog();
+
+            if (newInputJumpNumWindow.isFullOperation)
+            {
+                if (newInputJumpNumWindow.NUM <= 0)
+                {
+                    newInputJumpNumWindow.NUM = 1;
+                }
+                else
+                {
+                    newInputJumpNumWindow.NUM = newInputJumpNumWindow.NUM >= selectedCrossSection.SagittalTotalSliceNum ? selectedCrossSection.SagittalTotalSliceNum : newInputJumpNumWindow.NUM;
+                }
+
+                selectedCrossSection.SagittalNowSliceNum = newInputJumpNumWindow.NUM;
+                selectedCrossSection.RefreshImage("Sagittal");
+
+                RefreshSliceLabelNum();
+
+                SavePreviousInfo("Sagittal");
+
+                RestoreInitialSketchPara("Sagittal");
+                selectedCrossSection.RefreshSketch("Sagittal");
+                DelteAllPolygon(SagittalCanvas);
+                RefreshCanvasSketch("Sagittal");
+            }
+        }
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             TransverseInfo.Visibility = Visibility.Hidden;
@@ -417,7 +506,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                         newCrossectionSectionMouseLocationOrganInfo.CrossSectionType = "Transverse";
                         newCrossectionSectionMouseLocationOrganInfo.MouseLocationX = mouseLocation.X;
                         newCrossectionSectionMouseLocationOrganInfo.MouseLocationY = mouseLocation.Y;
-                        
+
                         if (TransverseSketchPolygonForShow != null)
                         {
                             TransverseCanvas.Children.Remove(TransverseSketchPolygonForShow);
@@ -437,7 +526,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                         TransverseSketchPolygonForShow.Points.Add(new Point(xIndex, TransverseSketchInfoTmp.vertexColl[0].Y));
                                         TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
                                         TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
-                                        TransverseSketchPolygonForShow.StrokeThickness = 1;
+                                        TransverseSketchPolygonForShow.StrokeThickness = 0.1;
                                         TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
                                         TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                                         break;
@@ -446,7 +535,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                         TransverseSketchPolygonForShow.Points.Add(new Point(xIndex, yIndex));
                                         TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
                                         TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
-                                        TransverseSketchPolygonForShow.StrokeThickness = 1;
+                                        TransverseSketchPolygonForShow.StrokeThickness = 0.1;
                                         TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
                                         TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                                         break;
@@ -691,7 +780,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                 TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
                                 TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
                                 TransverseSketchPolygonForShow.Fill = TransverseSketchBrush;
-                                TransverseSketchPolygonForShow.StrokeThickness = 1;
+                                TransverseSketchPolygonForShow.StrokeThickness = 0.1;
                                 TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
                                 TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                             }
@@ -770,11 +859,11 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                     TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
                                     TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
                                     TransverseSketchPolygonForShow.Fill = TransverseSketchBrush;
-                                    TransverseSketchPolygonForShow.StrokeThickness = 1;
+                                    TransverseSketchPolygonForShow.StrokeThickness = 0.1;
                                     TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
                                     TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                                 }
-                                
+
                                 TransverseSketchInfoTmp = null;
                                 TransverseSketchPolygonForShow = null;
                                 isTransverseBeginPoint = true;
@@ -958,7 +1047,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                         TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
                         TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
                         TransverseSketchPolygonForShow.Fill = TransverseSketchBrush;
-                        TransverseSketchPolygonForShow.StrokeThickness = 1;
+                        TransverseSketchPolygonForShow.StrokeThickness = 0.1;
                         TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
                         TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                     }
@@ -968,7 +1057,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 else if (TransverseSketchInfoTmp.vertexColl.Count <= 2)
                 {
                     TransverseCanvas.Children.Remove(TransverseSketchPolygonForShow);
-                    
+
                     MessageBox.Show("至少需要三个顶点才能围成一个有效的多边形!");
                 }
 
@@ -1529,7 +1618,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 isTransverseBeginPoint = true;
                 isTransverseEndPoint = false;
                 TransverseNowSliceNum = -1;
-                
+
                 TransverseSketchInfoTmp = null;
                 TransverseSketchPolygonForShow = null;
 
@@ -1542,7 +1631,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 isFrontalBeginPoint = true;
                 isFrontalEndPoint = false;
                 FrontalNowSliceNum = -1;
-                
+
                 FrontalSketchInfoTmp = null;
                 FrontalSketchPolygonForShow = null;
 
@@ -1555,7 +1644,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 isSagittalBeginPoint = true;
                 isSagittalEndPoint = false;
                 SagittalNowSliceNum = -1;
-                
+
                 SagittalSketchInfoTmp = null;
                 SagittalSketchPolygonForShow = null;
 
@@ -2070,7 +2159,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPoint.RenderTransform = TransverseImage.RenderTransform;
                             newPolygonPoint.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPoint.StrokeThickness = 1;
+                            newPolygonPoint.StrokeThickness = 0.1;
                             newPolygonPoint.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPoint.SnapsToDevicePixels = true;
                             TransverseCanvas.Children.Add(newPolygonPoint);
@@ -2083,7 +2172,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonRectangle.RenderTransform = TransverseImage.RenderTransform;
                             newPolygonRectangle.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonRectangle.StrokeThickness = 1;
+                            newPolygonRectangle.StrokeThickness = 0.1;
                             newPolygonRectangle.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonRectangle.SnapsToDevicePixels = true;
                             TransverseCanvas.Children.Add(newPolygonRectangle);
@@ -2096,7 +2185,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPolygon.RenderTransform = TransverseImage.RenderTransform;
                             newPolygonPolygon.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPolygon.StrokeThickness = 1;
+                            newPolygonPolygon.StrokeThickness = 0.1;
                             newPolygonPolygon.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPolygon.SnapsToDevicePixels = true;
                             TransverseCanvas.Children.Add(newPolygonPolygon);
@@ -2123,7 +2212,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPoint.RenderTransform = FrontalImage.RenderTransform;
                             newPolygonPoint.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPoint.StrokeThickness = 1;
+                            newPolygonPoint.StrokeThickness = 0.1;
                             newPolygonPoint.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPoint.SnapsToDevicePixels = true;
                             FrontalCanvas.Children.Add(newPolygonPoint);
@@ -2136,7 +2225,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonRectangle.RenderTransform = FrontalImage.RenderTransform;
                             newPolygonRectangle.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonRectangle.StrokeThickness = 1;
+                            newPolygonRectangle.StrokeThickness = 0.1;
                             newPolygonRectangle.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonRectangle.SnapsToDevicePixels = true;
                             FrontalCanvas.Children.Add(newPolygonRectangle);
@@ -2149,7 +2238,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPolygon.RenderTransform = FrontalImage.RenderTransform;
                             newPolygonPolygon.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPolygon.StrokeThickness = 1;
+                            newPolygonPolygon.StrokeThickness = 0.1;
                             newPolygonPolygon.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPolygon.SnapsToDevicePixels = true;
                             FrontalCanvas.Children.Add(newPolygonPolygon);
@@ -2176,7 +2265,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPoint.RenderTransform = SagittalImage.RenderTransform;
                             newPolygonPoint.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPoint.StrokeThickness = 1;
+                            newPolygonPoint.StrokeThickness = 0.1;
                             newPolygonPoint.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPoint.SnapsToDevicePixels = true;
                             SagittalCanvas.Children.Add(newPolygonPoint);
@@ -2189,7 +2278,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonRectangle.RenderTransform = SagittalImage.RenderTransform;
                             newPolygonRectangle.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonRectangle.StrokeThickness = 1;
+                            newPolygonRectangle.StrokeThickness = 0.1;
                             newPolygonRectangle.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonRectangle.SnapsToDevicePixels = true;
                             SagittalCanvas.Children.Add(newPolygonRectangle);
@@ -2202,7 +2291,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             }
                             newPolygonPolygon.RenderTransform = SagittalImage.RenderTransform;
                             newPolygonPolygon.Stroke = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
-                            // newPolygonPolygon.StrokeThickness = 1;
+                            newPolygonPolygon.StrokeThickness = 0.1;
                             newPolygonPolygon.Fill = new SolidColorBrush(selectedPhantom.CellsCollectionInAPhantom.AllCells[item.cellIndex].CellColor);
                             newPolygonPolygon.SnapsToDevicePixels = true;
                             SagittalCanvas.Children.Add(newPolygonPolygon);
@@ -2229,6 +2318,253 @@ namespace MCNPFileEditor.CrossSectionImageShow
             {
                 TransverseCanvas.Children.Remove(DistanceMeasureLine);
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            MCNPFileEditor.CrossSectionImageShow.FillTest newFillTest = new FillTest();
+            newFillTest.Owner = this;
+            newFillTest.SketchCollForTheTransverse = selectedCrossSection.SketchInATranseverseSlice;
+            newFillTest.selectedCrossSection = selectedCrossSection;
+            newFillTest.Show();
+        }
+
+        // 根据所画靶区替换体素
+        BackgroundWorker RaplaceBG;
+        public List<int> specifiedOrganList = new List<int>(); // 储存需要变换的体素
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (selectedPhantom != null && selectedPhantom.SketchCollForAllTransverse != null)
+            {
+                int IsNotNullNum = 0;
+                for (int i = 0; i < selectedPhantom.SketchCollForAllTransverse.Length; i++)
+                {
+                    if (selectedPhantom.SketchCollForAllTransverse[i] != null
+                        && selectedPhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
+                        && selectedPhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
+                    {
+                        IsNotNullNum++;
+                    }
+                }
+                ReplaceProgressBar.Maximum = IsNotNullNum;
+
+                RaplaceBG = (BackgroundWorker)this.FindResource("backgroundWorkerForReplace");
+
+                // 得到框选在多边形里面的元素
+                if (specifiedOrganList == null)
+                {
+                    specifiedOrganList = new List<int>();
+                }
+                Phantom thePhantom = selectedPhantom;
+                for (int i = 0; i < thePhantom.SketchCollForAllTransverse.Length; i++)
+                {
+                    if (thePhantom.SketchCollForAllTransverse[i] != null
+                        && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
+                        && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
+                    {
+                        IsNotNullNum++;
+                    }
+                }
+
+                // 按层数遍历
+                for (int i = 0; i < thePhantom.SketchCollForAllTransverse.Length; i++)
+                {
+                    // 临时储存替换的体素位置
+                    short[,] RaplaceMask = new short[thePhantom.RepeatStructureInAPhantom.DimY, thePhantom.RepeatStructureInAPhantom.DimX];
+                    for (int j = 0; j < thePhantom.RepeatStructureInAPhantom.DimY; j++)
+                    {
+                        for (int k = 0; k < thePhantom.RepeatStructureInAPhantom.DimX; k++)
+                        {
+                            RaplaceMask[j, k] = -1;
+                        }
+                    }
+
+                    if (thePhantom.SketchCollForAllTransverse[i] != null
+                        && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
+                        && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
+                    {
+                        foreach (var item in thePhantom.SketchCollForAllTransverse[i].sketchInfoColl)
+                        {
+                            bool[,] SketchTmp = MathFunction.SketchMask(item.vertexColl, thePhantom.RepeatStructureInAPhantom.DimX, thePhantom.RepeatStructureInAPhantom.DimY);
+                            for (int mm = 0; mm < thePhantom.RepeatStructureInAPhantom.DimY; mm++)
+                            {
+                                for (int nn = 0; nn < thePhantom.RepeatStructureInAPhantom.DimX; nn++)
+                                {
+                                    if (SketchTmp[mm, nn])
+                                    {
+                                        RaplaceMask[mm, nn] = (short)item.cellIndex;
+                                    }
+                                }
+                            }
+                        }
+                        for (int mm = 0; mm < thePhantom.RepeatStructureInAPhantom.DimY; mm++)
+                        {
+                            for (int nn = 0; nn < thePhantom.RepeatStructureInAPhantom.DimX; nn++)
+                            {
+                                if (RaplaceMask[mm, nn] != -1)
+                                {
+                                    // Mask索引与thePhantom.RepeatStructureInAPhantom.RepeatMatrix不同
+                                    // thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn] = RaplaceMask[mm, nn];
+                                    if (!specifiedOrganList.Where(x => x == thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]).ToArray().Any())
+                                    {
+                                        specifiedOrganList.Add(thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                InputReplaceOrgans InputReplaceOrganswindow = new InputReplaceOrgans()
+                {
+                    specifiedOrganList = specifiedOrganList,
+                };
+
+                InputReplaceOrganswindow.ShowDialog();
+                if (InputReplaceOrganswindow.isFullyOperate)
+                {
+                    specifiedOrganList = InputReplaceOrganswindow.specifiedOrganList;
+
+                    RaplaceBG.RunWorkerAsync(selectedPhantom);
+                }
+            }
+        }
+
+        private void BackgroundWorker_DoWork_1(object sender, DoWorkEventArgs e)
+        {
+            if (specifiedOrganList == null)
+            {
+                specifiedOrganList = new List<int>();
+            }
+            Phantom thePhantom = (Phantom)e.Argument;
+            double progressIndex = 0;
+            int IsNotNullNum = 0;
+            for (int i = 0; i < thePhantom.SketchCollForAllTransverse.Length; i++)
+            {
+                if (thePhantom.SketchCollForAllTransverse[i] != null
+                    && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
+                    && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
+                {
+                    IsNotNullNum++;
+                }
+            }
+
+            // 按层数遍历
+            for (int i = 0; i < thePhantom.SketchCollForAllTransverse.Length; i++)
+            {
+                // 临时储存替换的体素位置
+                short[,] RaplaceMask = new short[thePhantom.RepeatStructureInAPhantom.DimY, thePhantom.RepeatStructureInAPhantom.DimX];
+                for (int j = 0; j < thePhantom.RepeatStructureInAPhantom.DimY; j++)
+                {
+                    for (int k = 0; k < thePhantom.RepeatStructureInAPhantom.DimX; k++)
+                    {
+                        RaplaceMask[j, k] = -1;
+                    }
+                }
+
+                if (thePhantom.SketchCollForAllTransverse[i] != null
+                    && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
+                    && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
+                {
+                    foreach (var item in thePhantom.SketchCollForAllTransverse[i].sketchInfoColl)
+                    {
+                        bool[,] SketchTmp = MathFunction.SketchMask(item.vertexColl, thePhantom.RepeatStructureInAPhantom.DimX, thePhantom.RepeatStructureInAPhantom.DimY);
+                        for (int mm = 0; mm < thePhantom.RepeatStructureInAPhantom.DimY; mm++)
+                        {
+                            for (int nn = 0; nn < thePhantom.RepeatStructureInAPhantom.DimX; nn++)
+                            {
+                                if (SketchTmp[mm, nn])
+                                {
+                                    RaplaceMask[mm, nn] = (short)item.cellIndex;
+                                }
+                            }
+                        }
+                    }
+                    for (int mm = 0; mm < thePhantom.RepeatStructureInAPhantom.DimY; mm++)
+                    {
+                        for (int nn = 0; nn < thePhantom.RepeatStructureInAPhantom.DimX; nn++)
+                        {
+                            if (RaplaceMask[mm, nn] != -1)
+                            {
+                                // Mask索引与thePhantom.RepeatStructureInAPhantom.RepeatMatrix不同
+                                if (specifiedOrganList.Where(x => x == thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]).ToArray().Any())
+                                    thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn] = RaplaceMask[mm, nn];
+                                // if(! specifiedOrganList.Where(x=>x== thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]).ToArray().Any())
+                                // {
+                                //     specifiedOrganList.Add(thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]);
+                                // }
+                                
+                            }
+                        }
+                    }
+                    
+                    progressIndex++;
+                    RaplaceBG.ReportProgress((int)((progressIndex / IsNotNullNum) * 100));
+                }
+            }
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted_1(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show("FinishREplace");
+            selectedPhantom.ClearSketchCollForAll();
+            ReplaceProgressBar.Value = 0;
+        }
+
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ReplaceProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+            sfd.RestoreDirectory = true;
+            sfd.OverwritePrompt = true;
+            sfd.CheckPathExists = true;
+            if(sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string outfilename = sfd.FileName;
+                selectedPhantom.OutPutPhantom(outfilename);
+                MessageBox.Show("完成输出");
+            }
+        }
+
+        List<int> OrgansTobeMove = new List<int>() {4,6,74,96,98,111,112,116,117,118,122,123};
+        string organsMoveDirection = "X";
+        int organsMoceDis = 0;
+        int additionOrgan = 119; // 补充空位的器官
+        bool shouldForceReplace = true;
+        // 器官平移选择
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            InputTobeMoveOrgans newInputTobeMoveOrgans = new InputTobeMoveOrgans();
+            newInputTobeMoveOrgans.OrgansTobeMove = OrgansTobeMove;
+            newInputTobeMoveOrgans.ShowDialog();
+            if (newInputTobeMoveOrgans.isFullyOperation)
+            {
+                organsMoveDirection = newInputTobeMoveOrgans.organsMoveDirection;
+                organsMoceDis = newInputTobeMoveOrgans.organsMoceDis;
+                additionOrgan = newInputTobeMoveOrgans.additionOrgan;
+                shouldForceReplace = newInputTobeMoveOrgans.shouldForceReplace;
+
+                selectedPhantom.MoveOrgan(OrgansTobeMove, organsMoveDirection, organsMoceDis, additionOrgan, shouldForceReplace);
+
+                MessageBox.Show("完成替换");
+            }
+        }
+        // 统计体模的相关信息
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            MCNPFileEditor.CrossSectionImageShow.subWindowSliceInfo newsubWindowSliceInfo = new MCNPFileEditor.CrossSectionImageShow.subWindowSliceInfo(this.selectedPhantom);
+            // newsubWindowSliceInfo.selectedPhantom = this.selectedPhantom;
+            // newsubWindowSliceInfo.refreshInfo();
+            newsubWindowSliceInfo.ShowDialog();
+        }
+
+        private void SelectedPhantomCellinfoListView_MouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 

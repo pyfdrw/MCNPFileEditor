@@ -1,0 +1,28 @@
+﻿<Window x:Class="MCNPFileEditor.CrossSectionImageShow.InputReplaceOrgans"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MCNPFileEditor.CrossSectionImageShow"
+        mc:Ignorable="d"
+        Title="指定被替换的体素，以空格作为分隔符" Height="300" Width="300" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="225*"/>
+            <ColumnDefinition Width="37*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25*"/>
+            <RowDefinition Height="150*"/>
+            <RowDefinition Height="70*"/>
+            <RowDefinition Height="24*"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Column="1" Grid.Row="1" AllowDrop="True" x:Name="specifiedOrganListText">
+        </TextBox>
+
+        <Button Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="80" MinHeight="40" Click="Button_Click">
+            确认列表
+        </Button>
+    </Grid>
+</Window>

@@ -10,6 +10,7 @@
         Title="CrossSectionMainWindow" Height="768" Width="1365">
     <Window.Resources>
         <cm:BackgroundWorker x:Key="backgroundWorker" DoWork="BackgroundWorker_DoWork" RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted" />
+        <cm:BackgroundWorker x:Key="backgroundWorkerForReplace" DoWork="BackgroundWorker_DoWork_1"  RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted_1" ProgressChanged="BackgroundWorker_ProgressChanged" WorkerReportsProgress="True" WorkerSupportsCancellation="True"/>
         <local:ColorToSolidBrushConvert x:Key="ctbconvert"/>
     </Window.Resources>
     <Grid>
@@ -42,7 +43,7 @@
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
-            
+
             <TabControl x:Name="tabControl" Grid.Column="2">
                 <TabItem Header="勾画工具">
                     <Grid Background="#FFE5E5E5">
@@ -57,6 +58,8 @@
                                 </ComboBox.Items>
                             </ComboBox>
                             <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center">几何检查</Button>
+                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_1">填充检查</Button>
+                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_3">输出到文件</Button>
                         </StackPanel>
                     </Grid>
                 </TabItem>
@@ -66,6 +69,28 @@
                             <Button Margin="5" Click="Button_Click">距离</Button>
                             <Button Margin="5">体积</Button>
                             <Button Margin="5">面积</Button>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="替换工具">
+                    <Grid Background="#FFE5E5E5">
+                        <WrapPanel>
+                            <Button Margin="5" Click="Button_Click_2">执行替换</Button>
+                            <ProgressBar MinWidth="300" MaxHeight="10" x:Name="ReplaceProgressBar"></ProgressBar>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="平移工具">
+                    <Grid Background="#FFE5E5E5">
+                        <WrapPanel>
+                            <Button Margin="5" Click="Button_Click_4">执行平移</Button>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="统计工具">
+                    <Grid Background="#FFE5E5E5">
+                        <WrapPanel>
+                            <Button Margin="5" Click="Button_Click_5">输出到窗口</Button>
                         </WrapPanel>
                     </Grid>
                 </TabItem>
@@ -110,16 +135,21 @@
                 <Grid Grid.Column="2">
                     <Viewbox Margin="5">
                         <Canvas x:Name="TransverseCanvas" MouseWheel="TransverseCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="TransverseCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="TransverseCanvas_PreviewKeyDown">
-                            <Image x:Name="TransverseImage">
+                            <Image x:Name="TransverseImage" RenderOptions.BitmapScalingMode="NearestNeighbor">
                                 <Image.RenderTransform>
                                     <TransformGroup>
                                         <MatrixTransform x:Name="TransverseMatrixTransform"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
                             </Image>
+                            <Canvas.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="JUMP" Click="MenuItem_Click_3"></MenuItem>
+                                </ContextMenu>
+                            </Canvas.ContextMenu>
                         </Canvas>
                     </Viewbox>
-                    
+
                     <StackPanel x:Name="TransverseInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <StackPanel.ContextMenu>
                             <ContextMenu>
@@ -127,7 +157,7 @@
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                         <StackPanel Orientation="Horizontal">
-                            <Label>Now/Total: </Label>
+                            <Label>Now/Total:</Label>
                             <Label x:Name="nowSliceTransLabel" MinWidth="30" Content="{Binding Path=TransverseNowSliceNum, UpdateSourceTrigger=PropertyChanged}"></Label>
                             <Label>/</Label>
                             <Label x:Name="maxSliceTransLabel" MinWidth="30" Content="{Binding Path=TransverseTotalSliceNum}"></Label>
@@ -135,10 +165,10 @@
                         <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
                             <Image x:Name="TransverseCoordImage" ></Image>
                         </Viewbox>
-                        
+
                     </StackPanel>
                 </Grid>
-                
+
                 <Grid Grid.Column="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*"/>
@@ -158,6 +188,11 @@
                                         </TransformGroup>
                                     </Image.RenderTransform>
                                 </Image>
+                                <Canvas.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="JUMP" Click="MenuItem_Click_4"></MenuItem>
+                                    </ContextMenu>
+                                </Canvas.ContextMenu>
                             </Canvas>
                         </Viewbox>
                         <StackPanel x:Name="FrontalInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -188,6 +223,11 @@
                                         </TransformGroup>
                                     </Image.RenderTransform>
                                 </Image>
+                                <Canvas.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="JUMP" Click="MenuItem_Click_5"></MenuItem>
+                                    </ContextMenu>
+                                </Canvas.ContextMenu>
                             </Canvas>
                         </Viewbox>
                         <StackPanel x:Name="SagittalInfo" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -210,6 +250,6 @@
                 </Grid>
             </Grid>
         </Border>
-        
+
     </Grid>
 </Window>
