@@ -94,6 +94,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="CrossSectionImageShow\CellColorChange.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CrossSectionImageShow\CellStatisticChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -133,6 +137,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CrossSectionImageShow\CellColorChange.xaml.cs">
+      <DependentUpon>CellColorChange.xaml</DependentUpon>
     </Compile>
     <Compile Include="CrossSectionImageShow\CellStatisticChart.xaml.cs">
       <DependentUpon>CellStatisticChart.xaml</DependentUpon>

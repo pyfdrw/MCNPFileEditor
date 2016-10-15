@@ -99,6 +99,9 @@ namespace MCNPFileEditor.CrossSectionImageShow
             TransverseCanvas.AddHandler(UIElement.MouseMoveEvent, new MouseEventHandler(TransverseImage_MouseMove), true);
             FrontalCanvas.AddHandler(UIElement.MouseMoveEvent, new MouseEventHandler(FrontalImage_MouseMove), true);
             SagittalCanvas.AddHandler(UIElement.MouseMoveEvent, new MouseEventHandler(SagittalImage_MouseMove), true);
+
+            // ListView 双击事件
+            // SelectedPhantomCellinfoListView.AddHandler(ListViewItem.MouseDoubleClickEvent, new MouseButtonEventHandler(SelectedPhantomCellinfoListView_MouseDoubleClick), true);
         }
 
         /// <summary>
@@ -2562,9 +2565,76 @@ namespace MCNPFileEditor.CrossSectionImageShow
             newsubWindowSliceInfo.ShowDialog();
         }
 
+        //更改每个体素的颜色表示
         private void SelectedPhantomCellinfoListView_MouseDoubleClick(object sender, RoutedEventArgs e)
         {
+            
+            Cell CellShouldBeChanged = null; // 需要修改显示颜色的cell
 
+            if(SelectedPhantomCellinfoListView.ItemsSource != null && SelectedPhantomCellinfoListView.SelectedItem != null)
+            {
+                Cell selectedCell = SelectedPhantomCellinfoListView.SelectedItem as Cell;
+                int cellIndex = selectedCell.CellIndex;
+
+                foreach (var item in selectedPhantom.CellsCollectionInAPhantom.AllCells)
+                {
+                    if (item.CellIndex == cellIndex)
+                    {
+                        CellShouldBeChanged = item;
+                        break;
+                    }
+                }
+            }
+
+            if (CellShouldBeChanged == null)
+            {
+                MessageBox.Show("查找Cell出错");
+            }
+            else
+            {
+                CellColorChange newCellColorChange = new CellColorChange(CellShouldBeChanged);
+                newCellColorChange.ShowDialog();
+                if (newCellColorChange.isAccepted)
+                {
+                    CellShouldBeChanged.CellColor = newCellColorChange.CellColor;
+                    SelectedPhantomCellinfoListView.ItemsSource = selectedPhantom.CellsCollectionInAPhantom.AllCells.Where(x => (x != null && x.IsCellEffective == true));
+                }
+            }
+        }
+
+        private void SelectedPhantomCellinfoListView_MouseDoubleClick_1(object sender, MouseButtonEventArgs e)
+        {
+            Cell CellShouldBeChanged = null; // 需要修改显示颜色的cell
+
+            if (SelectedPhantomCellinfoListView.ItemsSource != null && SelectedPhantomCellinfoListView.SelectedItem != null)
+            {
+                Cell selectedCell = SelectedPhantomCellinfoListView.SelectedItem as Cell;
+                int cellIndex = selectedCell.CellIndex;
+
+                foreach (var item in selectedPhantom.CellsCollectionInAPhantom.AllCells)
+                {
+                    if (item != null && item.CellIndex == cellIndex)
+                    {
+                        CellShouldBeChanged = item;
+                        break;
+                    }
+                }
+            }
+
+            if (CellShouldBeChanged == null)
+            {
+                MessageBox.Show("查找Cell出错");
+            }
+            else
+            {
+                CellColorChange newCellColorChange = new CellColorChange(CellShouldBeChanged);
+                newCellColorChange.ShowDialog();
+                if (newCellColorChange.isAccepted)
+                {
+                    CellShouldBeChanged.CellColor = newCellColorChange.CellColor;
+                    SelectedPhantomCellinfoListView.ItemsSource = selectedPhantom.CellsCollectionInAPhantom.AllCells.Where(x => (x != null && x.IsCellEffective == true));
+                }
+            }
         }
     }
 
