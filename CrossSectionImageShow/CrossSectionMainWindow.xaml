@@ -39,7 +39,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" >
                         <Label HorizontalContentAlignment="Center" VerticalAlignment="Center" >器官颜色:</Label>
-                        <Label Margin="5,0,0,0" MinWidth="100" x:Name="SelectedOrganColorLabel" Background="{Binding CellColor, Converter={StaticResource ctbconvert}}"></Label>
+                        <Label Margin="5,0,0,0" MinWidth="100" x:Name="SelectedOrganColorLabel" Background="{Binding CellColor, Converter={StaticResource ctbconvert}, NotifyOnSourceUpdated=True}"></Label>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
@@ -57,8 +57,9 @@
                                     <ComboBoxItem>清除选择</ComboBoxItem>
                                 </ComboBox.Items>
                             </ComboBox>
-                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center">几何检查</Button>
+                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_7">几何检查</Button>
                             <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_1">填充检查</Button>
+                            <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_6">靶区复制</Button>
                             <Button Margin="5" MinWidth="60" MinHeight="20" VerticalAlignment="Center" Click="Button_Click_3">输出到文件</Button>
                         </StackPanel>
                     </Grid>
@@ -110,31 +111,33 @@
                 <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWE" Background="Black"/>
                 <GridSplitter Grid.Column="3" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWE" Background="Black"/>
 
-                <GroupBox Header="器官列表" Margin="5">
-                    <ListView x:Name="SelectedPhantomCellinfoListView" MouseDoubleClick="SelectedPhantomCellinfoListView_MouseDoubleClick_1" >
-                        <ListView.View>
-                            <GridView>
-                                <GridView.Columns>
-                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CellIndex}">器官编号</GridViewColumn>
-                                    <GridViewColumn DisplayMemberBinding="{Binding Path=MaterialIndex}">材料编号</GridViewColumn>
-                                    <GridViewColumn DisplayMemberBinding="{Binding Path=DensityValue}">材料密度</GridViewColumn>
-                                    <GridViewColumn Header="表示颜色">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Label MinHeight="30" MinWidth="60" Background="{Binding Path=CellColor, Converter={StaticResource ctbconvert}}"></Label>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn DisplayMemberBinding="{Binding Path=OrganName}">器官名称</GridViewColumn>
-                                </GridView.Columns>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                </GroupBox>
+                <Grid Grid.Column="0">
+                    <GroupBox Header="器官列表" Margin="5">
+                        <ListView x:Name="SelectedPhantomCellinfoListView" MouseDoubleClick="SelectedPhantomCellinfoListView_MouseDoubleClick_1" >
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.Columns>
+                                        <GridViewColumn DisplayMemberBinding="{Binding Path=CellIndex}">器官编号</GridViewColumn>
+                                        <GridViewColumn DisplayMemberBinding="{Binding Path=MaterialIndex}">材料编号</GridViewColumn>
+                                        <GridViewColumn DisplayMemberBinding="{Binding Path=DensityValue}">材料密度</GridViewColumn>
+                                        <GridViewColumn Header="表示颜色">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Label MinHeight="30" MinWidth="60" Background="{Binding Path=CellColor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ctbconvert}}"></Label>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn DisplayMemberBinding="{Binding Path=OrganName}">器官名称</GridViewColumn>
+                                    </GridView.Columns>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </GroupBox>
+                </Grid>
 
                 <Grid Grid.Column="2">
                     <Viewbox Margin="5">
-                        <Canvas x:Name="TransverseCanvas" MouseWheel="TransverseCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="TransverseCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="TransverseCanvas_PreviewKeyDown">
+                        <Canvas x:Name="TransverseCanvas" MouseWheel="TransverseCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="TransverseCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="TransverseCanvas_PreviewKeyDown" MouseLeftButtonDown="TransverseCanvas_MouseLeftButtonDown">
                             <Image x:Name="TransverseImage" RenderOptions.BitmapScalingMode="NearestNeighbor">
                                 <Image.RenderTransform>
                                     <TransformGroup>
@@ -145,6 +148,7 @@
                             <Canvas.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="JUMP" Click="MenuItem_Click_3"></MenuItem>
+                                    <MenuItem Header="Radius" Click="MenuItem_OnClick"></MenuItem>
                                 </ContextMenu>
                             </Canvas.ContextMenu>
                         </Canvas>
@@ -162,7 +166,7 @@
                             <Label>/</Label>
                             <Label x:Name="maxSliceTransLabel" MinWidth="30" Content="{Binding Path=TransverseTotalSliceNum}"></Label>
                         </StackPanel>
-                        <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                        <Viewbox Width="50" Height="50" HorizontalAlignment="Left">
                             <Image x:Name="TransverseCoordImage" ></Image>
                         </Viewbox>
 
@@ -178,7 +182,7 @@
 
                     <GridSplitter Height="3" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black" />
 
-                    <Grid>
+                    <Grid Grid.Row="0">
                         <Viewbox>
                             <Canvas x:Name="FrontalCanvas" MouseWheel="FrontalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="FrontalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="FrontalCanvas_PreviewKeyDown">
                                 <Image x:Name="FrontalImage">
@@ -191,6 +195,7 @@
                                 <Canvas.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="JUMP" Click="MenuItem_Click_4"></MenuItem>
+                                        <MenuItem Header="大屏显示" Click="MenuItem_Click_6"></MenuItem>
                                     </ContextMenu>
                                 </Canvas.ContextMenu>
                             </Canvas>
@@ -207,10 +212,11 @@
                                 <Label>/</Label>
                                 <Label x:Name="maxSliceFrontLabel" MinWidth="30" Content="{Binding FrontalTotalSliceNum}"></Label>
                             </StackPanel>
-                            <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                            <Viewbox Width="50" Height="50" HorizontalAlignment="Left">
                                 <Image x:Name="FrontalCoordImage"></Image>
                             </Viewbox>
                         </StackPanel>
+
                     </Grid>
 
                     <Grid Grid.Row="2">
@@ -242,7 +248,7 @@
                                 <Label>/</Label>
                                 <Label x:Name="maxSliceSagittalLabel" MinWidth="30" Content="{Binding SagittalTotalSliceNum}"></Label>
                             </StackPanel>
-                            <Viewbox Width="100" Height="100" HorizontalAlignment="Left">
+                            <Viewbox Width="50" Height="50" HorizontalAlignment="Left">
                                 <Image x:Name="SagittalCoordImage"></Image>
                             </Viewbox>
                         </StackPanel>

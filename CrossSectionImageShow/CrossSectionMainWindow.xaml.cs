@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Globalization;
 using System.IO;
 using System.Windows.Media.Media3D;
+using ClipperLib;
 
 namespace MCNPFileEditor.CrossSectionImageShow
 {
@@ -543,6 +544,45 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                         TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                                         break;
                                     case MaskType.CircleType:
+                                        // 仅在鼠标左键按下并且移动过程中并且
+                                        // 已经创建初始的圆形多边形区域
+                                        // 并且才进行环状靶区勾画
+                                        // 不支持新画的区域与原来的区域不连通，这个是程序结构限制，不是采用开源库的原因
+                                        if (e.LeftButton == MouseButtonState.Pressed)
+                                        {
+                                            // 新的圆形
+                                            polygonForCircleToolShowTmp = new Polygon();
+                                            SketchInfo sketchInfoTmp = MathFunction.CalCirclePoints(new Point(xIndex, yIndex), drawCircleRadius, selectedCell.CellIndex, 0);
+                                            foreach (Point point in sketchInfoTmp.vertexColl)
+                                            {
+                                                polygonForCircleToolShowTmp.Points.Add(point);
+                                            }
+                                            List<Polygon> firstPolygon = new List<Polygon>();
+                                            firstPolygon.Add(TransverseSketchPolygonForShow);
+                                            List<Polygon> secondPolygon = new List<Polygon>();
+                                            secondPolygon.Add(polygonForCircleToolShowTmp);
+                                            List<Polygon> answerPolygon;
+                                            answerPolygon = MathFunction.CalPolygonsBoolOp(firstPolygon, secondPolygon, ClipType.ctUnion,1000);
+                                            if (answerPolygon.Count > 1) // 不支持新画的区域与原来的区域不连通，这个是程序结构限制，不是采用开源库的原因
+                                            {
+                                                polygonForCircleToolShowTmp = null;
+                                                TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
+                                                TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
+                                                TransverseSketchPolygonForShow.StrokeThickness = 0.1;
+                                                TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
+                                                TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
+                                                return;
+                                            }
+                                            else
+                                            {
+                                                TransverseSketchPolygonForShow = answerPolygon[0];
+                                                TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
+                                                TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
+                                                TransverseSketchPolygonForShow.StrokeThickness = 0.1;
+                                                TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
+                                                TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
+                                            }
+                                        }
                                         break;
                                     default:
                                         break;
@@ -642,28 +682,28 @@ namespace MCNPFileEditor.CrossSectionImageShow
             }
         }
 
-        private void SelectedPhantomCellinfoListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            object selectItem = SelectedPhantomCellinfoListView.SelectedItem;
-            int selectedIndex = SelectedPhantomCellinfoListView.SelectedIndex;
+        //private void SelectedPhantomCellinfoListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        //{
+        //    object selectItem = SelectedPhantomCellinfoListView.SelectedItem;
+        //    int selectedIndex = SelectedPhantomCellinfoListView.SelectedIndex;
 
-            if (selectItem != null)
-            {
-                // MessageBox.Show("{0,5}, selectedIndex");
-                // MessageBox.Show(selectItem.ToString());
-                // MessageBox.Show(sender.ToString());
-                selectedCell = (Cell)selectItem;
-                SelectedOrganGroupBox.DataContext = selectedCell;
+        //    if (selectItem != null)
+        //    {
+        //        // MessageBox.Show("{0,5}, selectedIndex");
+        //        // MessageBox.Show(selectItem.ToString());
+        //        // MessageBox.Show(sender.ToString());
+        //        selectedCell = (Cell)selectItem;
+        //        SelectedOrganGroupBox.DataContext = selectedCell;
 
-                SavePreviousInfo("Transverse");
-                SavePreviousInfo("Frontal");
-                SavePreviousInfo("Sagittal");
+        //        SavePreviousInfo("Transverse");
+        //        SavePreviousInfo("Frontal");
+        //        SavePreviousInfo("Sagittal");
 
-                TransverseSketchBrush = new SolidColorBrush(selectedCell.CellColor);
-                FrontalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
-                SagittalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
-            }
-        }
+        //        TransverseSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+        //        FrontalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+        //        SagittalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+        //    }
+        //}
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -675,6 +715,15 @@ namespace MCNPFileEditor.CrossSectionImageShow
             if (4 == index)
             {
                 selectedMaskType = null;
+            }
+            if (3 == index) // 设置画靶区半径的功能
+            {
+                MCNPFileEditor.CrossSectionImageShow.RadiusSetWindow newRadiusSetWindow = new RadiusSetWindow();
+                newRadiusSetWindow.ShowDialog();
+                if (newRadiusSetWindow.RadiusSet != -1)
+                {
+                    drawCircleRadius = newRadiusSetWindow.RadiusSet;
+                }
             }
 
             SavePreviousInfo("Transverse");
@@ -743,6 +792,8 @@ namespace MCNPFileEditor.CrossSectionImageShow
         SolidColorBrush FrontalSketchBrush = new SolidColorBrush();
         SolidColorBrush SagittalSketchBrush = new SolidColorBrush();
 
+        // 画圆的半径
+        private double drawCircleRadius = 1;
         // 画靶区Transverse
         private void TransverseCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -807,10 +858,24 @@ namespace MCNPFileEditor.CrossSectionImageShow
 
                             isTransverseBeginPoint = false;
                             break;
-                        case MaskType.CircleType: // 圆，监视中心和任意圆上的点即可
-                            TransverseSketchInfoTmp = new SketchInfo(selectedCell.CellIndex, new Point(xIndex, yIndex), selectedMaskType.Value);
-                            isTransverseBeginPoint = false;
-                            isTransverseEndPoint = true;
+                        case MaskType.CircleType: // 圆，监视中心
+                            // TransverseSketchInfoTmp = 
+                            TransverseSketchInfoTmp = new SketchInfo(selectedCell.CellIndex)
+                            {
+                                maskType = MaskType.PolygonType, // 采用多边形的形式存储
+                                vertexColl = new List<Point>()
+                            };
+                            TransverseSketchInfoTmp.vertexColl.AddRange(TransverseSketchPolygonForShow.Points);
+                            if (selectedPhantom.SketchCollForAllTransverse[TransverseNowSliceNum].sketchInfoColl == null)
+                            {
+                                selectedPhantom.SketchCollForAllTransverse[TransverseNowSliceNum].sketchInfoColl = new List<SketchInfo>();
+                            }
+                            selectedPhantom.SketchCollForAllTransverse[TransverseNowSliceNum].sketchInfoColl.Add(TransverseSketchInfoTmp);
+                            isTransverseBeginPoint = true;
+                            isTransverseEndPoint = false;
+                            selectedCrossSection.RefreshSketch("Transverse");
+                            TransverseSketchInfoTmp = null;
+                            TransverseSketchPolygonForShow = null;
                             break;
                         default:
                             break;
@@ -886,9 +951,6 @@ namespace MCNPFileEditor.CrossSectionImageShow
                         case MaskType.CircleType:
                             if (isTransverseEndPoint)
                             {
-                                TransverseSketchInfoTmp.vertexColl.Add(new Point(xIndex, yIndex));
-                                selectedPhantom.SketchCollForAllTransverse[TransverseNowSliceNum].sketchInfoColl.Add(TransverseSketchInfoTmp);
-                                TransverseSketchInfoTmp = null;
                                 isTransverseBeginPoint = true;
                                 isTransverseEndPoint = false;
                                 selectedCrossSection.RefreshSketch("Transverse");
@@ -897,6 +959,58 @@ namespace MCNPFileEditor.CrossSectionImageShow
                             {
                                 throw new Exception("对于CircleType，不应出现isTransverseBeginPoint与isTransverseEndPoint均为false的情况!");
                             }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        private Polygon polygonForCircleToolShowTmp = null;
+        private void TransverseCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TransverseCanvas.Focus();
+
+            if (selectedCell == null)
+            {
+                return;
+            }
+
+            selectedMaskTypePre = selectedMaskType;
+
+            Point mouseLocation = e.GetPosition(TransverseImage);
+            double xIndex = mouseLocation.X;
+            double yIndex = mouseLocation.Y;
+            int zIndex = selectedCrossSection.TransverseNowSliceNum; // 层数
+            TransverseNowSliceNum = zIndex;
+
+            if (isTransverseBeginPoint)
+            {
+                if (selectedMaskType.HasValue)
+                {
+
+                    switch (selectedMaskType.Value)
+                    {
+                        case MaskType.CircleType:  // 仅圆形这样处理第一步先画下一个圆多边形
+                            if (TransverseSketchInfoTmp != null)
+                            {
+                                throw new Exception("使用圆形工具勾画时出现临时靶区未能清理的情况");
+                            }
+                            // 画下的第一圆，临时存储下来
+                            TransverseSketchInfoTmp = MathFunction.CalCirclePoints(new Point(xIndex, yIndex), drawCircleRadius,
+                                selectedCell.CellIndex, 0);
+                            // 在Canvas上显示
+                            TransverseSketchPolygonForShow = new Polygon();
+                            foreach (Point point in TransverseSketchInfoTmp.vertexColl)
+                            {
+                                TransverseSketchPolygonForShow.Points.Add(point);
+                            }
+                            TransverseSketchPolygonForShow.RenderTransform = TransverseImage.RenderTransform;
+                            TransverseSketchPolygonForShow.Stroke = TransverseSketchBrush;
+                            TransverseSketchPolygonForShow.StrokeThickness = 0.1;
+                            TransverseSketchPolygonForShow.StrokeLineJoin = PenLineJoin.Bevel;
+                            TransverseCanvas.Children.Add(TransverseSketchPolygonForShow);
                             break;
                         default:
                             break;
@@ -2496,11 +2610,11 @@ namespace MCNPFileEditor.CrossSectionImageShow
                                 // {
                                 //     specifiedOrganList.Add(thePhantom.RepeatStructureInAPhantom.RepeatMatrix[i - 1, mm, nn]);
                                 // }
-                                
+
                             }
                         }
                     }
-                    
+
                     progressIndex++;
                     RaplaceBG.ReportProgress((int)((progressIndex / IsNotNullNum) * 100));
                 }
@@ -2525,7 +2639,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
             sfd.RestoreDirectory = true;
             sfd.OverwritePrompt = true;
             sfd.CheckPathExists = true;
-            if(sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string outfilename = sfd.FileName;
                 selectedPhantom.OutPutPhantom(outfilename);
@@ -2533,7 +2647,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
             }
         }
 
-        List<int> OrgansTobeMove = new List<int>() {4,6,74,96,98,111,112,116,117,118,122,123};
+        List<int> OrgansTobeMove = new List<int>() { 4, 6, 74, 96, 98, 111, 112, 116, 117, 118, 122, 123 };
         string organsMoveDirection = "X";
         int organsMoceDis = 0;
         int additionOrgan = 119; // 补充空位的器官
@@ -2568,10 +2682,10 @@ namespace MCNPFileEditor.CrossSectionImageShow
         //更改每个体素的颜色表示
         private void SelectedPhantomCellinfoListView_MouseDoubleClick(object sender, RoutedEventArgs e)
         {
-            
+
             Cell CellShouldBeChanged = null; // 需要修改显示颜色的cell
 
-            if(SelectedPhantomCellinfoListView.ItemsSource != null && SelectedPhantomCellinfoListView.SelectedItem != null)
+            if (SelectedPhantomCellinfoListView.ItemsSource != null && SelectedPhantomCellinfoListView.SelectedItem != null)
             {
                 Cell selectedCell = SelectedPhantomCellinfoListView.SelectedItem as Cell;
                 int cellIndex = selectedCell.CellIndex;
@@ -2604,6 +2718,26 @@ namespace MCNPFileEditor.CrossSectionImageShow
 
         private void SelectedPhantomCellinfoListView_MouseDoubleClick_1(object sender, MouseButtonEventArgs e)
         {
+            object selectItem = SelectedPhantomCellinfoListView.SelectedItem;
+            int selectedIndex = SelectedPhantomCellinfoListView.SelectedIndex;
+
+            if (selectItem != null)
+            {
+                // MessageBox.Show("{0,5}, selectedIndex");
+                // MessageBox.Show(selectItem.ToString());
+                // MessageBox.Show(sender.ToString());
+                selectedCell = (Cell)selectItem;
+                SelectedOrganGroupBox.DataContext = selectedCell;
+
+                SavePreviousInfo("Transverse");
+                SavePreviousInfo("Frontal");
+                SavePreviousInfo("Sagittal");
+
+                TransverseSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+                FrontalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+                SagittalSketchBrush = new SolidColorBrush(selectedCell.CellColor);
+            }
+
             Cell CellShouldBeChanged = null; // 需要修改显示颜色的cell
 
             if (SelectedPhantomCellinfoListView.ItemsSource != null && SelectedPhantomCellinfoListView.SelectedItem != null)
@@ -2633,9 +2767,99 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 {
                     CellShouldBeChanged.CellColor = newCellColorChange.CellColor;
                     SelectedPhantomCellinfoListView.ItemsSource = selectedPhantom.CellsCollectionInAPhantom.AllCells.Where(x => (x != null && x.IsCellEffective == true));
+
+                    {
+                        if (CellShouldBeChanged != null)
+                        {
+                            // MessageBox.Show("{0,5}, selectedIndex");
+                            // MessageBox.Show(selectItem.ToString());
+                            // MessageBox.Show(sender.ToString());
+                            SelectedOrganGroupBox.DataContext = CellShouldBeChanged;
+
+                            SavePreviousInfo("Transverse");
+                            SavePreviousInfo("Frontal");
+                            SavePreviousInfo("Sagittal");
+
+                            TransverseSketchBrush = new SolidColorBrush(CellShouldBeChanged.CellColor);
+                            FrontalSketchBrush = new SolidColorBrush(CellShouldBeChanged.CellColor);
+                            SagittalSketchBrush = new SolidColorBrush(CellShouldBeChanged.CellColor);
+                        }
+                    }
                 }
             }
         }
+
+        // 非正式
+        // 用于复制当前层的靶区到其他所有层
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            int sliceNum = selectedPhantom.RepeatStructureInAPhantom.UpperBoundZ - selectedPhantom.RepeatStructureInAPhantom.LowerBoundZ + 1;
+            int transverseNowSliceNum = selectedCrossSection.TransverseNowSliceNum;
+
+            SketchCollInASlice transverseNowSliceSketch = selectedPhantom.SketchCollForAllTransverse[transverseNowSliceNum];
+
+            InputBound newInputBound = new InputBound();
+            newInputBound.ShowDialog();
+            if (newInputBound.IsOperationEffective)
+            {
+                int beginningNum = 0;
+                int endNum = 0;
+                beginningNum = (int) Math.Round(newInputBound.LowerBoundValue);
+                endNum = (int) Math.Round(newInputBound.UpperBoundValue);
+                if (endNum <= beginningNum)
+                {
+                    endNum = beginningNum;
+                }
+                beginningNum = beginningNum < 1 ? 1 : beginningNum;
+                endNum = endNum > sliceNum ? sliceNum : endNum;
+
+
+                for (int i = beginningNum; i <= endNum; i++)
+                {
+                    if (i != transverseNowSliceNum)
+                    {
+                        foreach (var item in transverseNowSliceSketch.sketchInfoColl)
+                        {
+                            if(!selectedPhantom.SketchCollForAllTransverse[i].sketchInfoColl.Exists(x=>x == item)) // 不存在才添加
+                                selectedPhantom.SketchCollForAllTransverse[i].sketchInfoColl.Add(item);
+                        }
+                    }
+                }
+
+                MessageBox.Show("Finish");
+            }
+            else
+            {
+                MessageBox.Show("Do nothing!");
+            }
+        }
+
+        // 某一界面的图大屏显示
+        private void MenuItem_Click_6(object sender, RoutedEventArgs e)
+        {
+            CrossSectionImageBigShow newCrossSectionImageBigShow = new CrossSectionImageBigShow(selectedPhantom, selectedCrossSection);
+            newCrossSectionImageBigShow.Show();
+        }
+
+        private void Button_Click_7(object sender, RoutedEventArgs e)
+        {
+
+        }
+        
+        // 靶区勾画使用圆形工具时用于设置勾画圆的半径
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            MCNPFileEditor.CrossSectionImageShow.RadiusSetWindow newRadiusSetWindow = new RadiusSetWindow();
+            newRadiusSetWindow.ShowDialog();
+            if (newRadiusSetWindow.RadiusSet != -1)
+            {
+                drawCircleRadius = newRadiusSetWindow.RadiusSet;
+            }
+            
+            // throw new NotImplementedException();
+        }
+
+        
     }
 
     public class CrossSection : INotifyPropertyChanged

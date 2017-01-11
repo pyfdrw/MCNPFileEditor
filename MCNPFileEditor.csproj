@@ -9,12 +9,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MCNPFileEditor</RootNamespace>
     <AssemblyName>MCNPFileEditor</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -50,6 +51,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>E147F4F7B5B73A0BD2A2B60A95C7A5DC740DF8D6</ManifestCertificateThumbprint>
@@ -64,12 +66,15 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiveCharts, Version=0.7.4.0, Culture=neutral, PublicKeyToken=c5935629d38af058, processorArchitecture=MSIL">
-      <HintPath>packages\LiveCharts.0.7.4\lib\portable-net40+sl5+win8+wp8+wpa81\LiveCharts.dll</HintPath>
+    <Reference Include="clipper_library">
+      <HintPath>ReferenceDll\clipper_library.dll</HintPath>
+    </Reference>
+    <Reference Include="Livecharts, Version=0.8.0.0, Culture=neutral, PublicKeyToken=c5935629d38af058, processorArchitecture=MSIL">
+      <HintPath>packages\LiveCharts.0.8.0\lib\net40\Livecharts.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="LiveCharts.Wpf, Version=0.7.4.0, Culture=neutral, PublicKeyToken=3b585c2a5f1a92c1, processorArchitecture=MSIL">
-      <HintPath>packages\LiveCharts.Wpf.0.7.4\lib\net452\LiveCharts.Wpf.dll</HintPath>
+    <Reference Include="LiveCharts.Wpf, Version=0.8.0.0, Culture=neutral, PublicKeyToken=3b585c2a5f1a92c1, processorArchitecture=MSIL">
+      <HintPath>packages\LiveCharts.Wpf.0.8.0\lib\net45\LiveCharts.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -102,6 +107,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CrossSectionImageShow\CrossSectionImageBigShow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CrossSectionImageShow\CrossSectionMainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -114,6 +123,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CrossSectionImageShow\InputBound.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CrossSectionImageShow\InputJumpNum.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -123,6 +136,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CrossSectionImageShow\InputTobeMoveOrgans.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CrossSectionImageShow\RadiusSetWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -144,6 +161,9 @@
     <Compile Include="CrossSectionImageShow\CellStatisticChart.xaml.cs">
       <DependentUpon>CellStatisticChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CrossSectionImageShow\CrossSectionImageBigShow.xaml.cs">
+      <DependentUpon>CrossSectionImageBigShow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CrossSectionImageShow\CrossSectionMainWindow.xaml.cs">
       <DependentUpon>CrossSectionMainWindow.xaml</DependentUpon>
     </Compile>
@@ -153,6 +173,9 @@
     <Compile Include="CrossSectionImageShow\FillTest.xaml.cs">
       <DependentUpon>FillTest.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CrossSectionImageShow\InputBound.xaml.cs">
+      <DependentUpon>InputBound.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CrossSectionImageShow\InputJumpNum.xaml.cs">
       <DependentUpon>InputJumpNum.xaml</DependentUpon>
     </Compile>
@@ -161,6 +184,9 @@
     </Compile>
     <Compile Include="CrossSectionImageShow\InputTobeMoveOrgans.xaml.cs">
       <DependentUpon>InputTobeMoveOrgans.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CrossSectionImageShow\RadiusSetWindow.xaml.cs">
+      <DependentUpon>RadiusSetWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CrossSectionImageShow\subWindowSliceInfo.xaml.cs">
       <DependentUpon>subWindowSliceInfo.xaml</DependentUpon>

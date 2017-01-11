@@ -105,7 +105,9 @@ namespace MCNPFileEditor
                         List<Thread> threadList = new List<Thread>();
                         foreach (var item in OpenFileList)
                         {
-                            Thread newThread = new Thread(()=>NewThread_DoWork(item));
+                            string lengthText = borderExtendLengthText.Text;
+                            short voidIndex = Convert.ToInt16(voidText.Text);
+                            Thread newThread = new Thread(() => NewThread_DoWork(item, lengthText, voidIndex));
                             threadList.Add(newThread);
                             newThread.Start();
                         }
@@ -180,7 +182,9 @@ namespace MCNPFileEditor
                         List<Thread> threadList = new List<Thread>();
                         foreach (var item in AddFileList)
                         {
-                            Thread newThread = new Thread(() => NewThread_DoWork(item));
+                            string lengthText = borderExtendLengthText.Text;
+                            short voidIndex = Convert.ToInt16(voidText.Text);
+                            Thread newThread = new Thread(() => NewThread_DoWork(item, lengthText, voidIndex));
                             threadList.Add(newThread);
                             newThread.Start();
                         }
@@ -252,14 +256,29 @@ namespace MCNPFileEditor
             //finishWorkCount++;
         }
 
-        private void NewThread_DoWork(object obj)
+        private void NewThread_DoWork(object obj, string extendLength, short voidIndex)
         {
             Phantom newPhantom;
             string inputPhantomFilePath = (string)obj;
 
-            newPhantom = new Phantom(inputPhantomFilePath, RepOrganName, mode, OrganNameFile);
+            int extendLengthValue = -1;
+            try
+            {
+                extendLengthValue = Convert.ToInt32(extendLength);
+            }
+            catch (Exception)
+            {
+                return;
+            }
 
-            lock(phantomsCollection)
+            newPhantom = new Phantom(inputPhantomFilePath, RepOrganName, mode, OrganNameFile);
+            
+            if (newPhantom.RepeatStructureInAPhantom != null && newPhantom.RepeatStructureInAPhantom.RepeatMatrix != null && extendLengthValue >= 1)
+            {
+                newPhantom.RepeatStructureInAPhantom.ExtendBorder(extendLengthValue, voidIndex);
+            }
+
+            lock (phantomsCollection)
             {
                 phantomsCollection.AllPhantoms.Add(newPhantom);
                 finishWorkCount++;

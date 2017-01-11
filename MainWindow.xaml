@@ -6,7 +6,7 @@
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         xmlns:local="clr-namespace:MCNPFileEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="422" Width="594">
+        Title="MainWindow" Height="500" Width="594">
     <Window.Resources>
         <cm:BackgroundWorker x:Key="backgroundworker" 
                              WorkerReportsProgress="True" WorkerSupportsCancellation="True" 
@@ -55,6 +55,14 @@
                         <Label x:Name="OrgannameFile" Content="{Binding}"></Label>
                     </Border>
                     <Button MinWidth="25" Click="Button_Click_2">...</Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <Label MinWidth="100">体模外扩距离:</Label>
+                    <TextBox MinWidth="200" VerticalContentAlignment="Center" Background="White" x:Name="borderExtendLengthText">0</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <Label MinWidth="100">VOID代号:</Label>
+                    <TextBox MinWidth="200" VerticalContentAlignment="Center" Background="White" x:Name="voidText">150</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                     <Label MinWidth="100">自动删除重复</Label>

@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using ClipperLib;
+
+using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
+using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 
 namespace MCNPFileEditor.DataClassAndControl
 {
@@ -308,7 +314,8 @@ namespace MCNPFileEditor.DataClassAndControl
                     {
                         if (AET[i].Count % 2 != 0)
                         {
-                            throw new Exception("交点个数应该是偶数个!");
+                            // TODO 进行错误检查
+                            // throw new Exception("交点个数应该是偶数个!");
                         }
                         else
                         {
@@ -637,5 +644,251 @@ namespace MCNPFileEditor.DataClassAndControl
 
             return LocalCostFZAns;
         }
+
+        /// <summary>  
+        /// 判断点是否在多边形内.  
+        /// ----------原理----------  
+        /// 注意到如果从P作水平向左的射线的话，如果P在多边形内部，那么这条射线与多边形的交点必为奇数，  
+        /// 如果P在多边形外部，则交点个数必为偶数(0也在内)。  
+        /// </summary>  
+        /// <param name="checkPoint">要判断的点</param>  
+        /// <param name="polygonPoints">多边形的顶点</param>  
+        /// <returns></returns>  
+        public static bool IsInPolygon(Point checkPoint, List<Point> polygonPoints)
+        {
+            bool inside = false;
+            int pointCount = polygonPoints.Count;
+            Point p1, p2;
+            for (int i = 0, j = pointCount - 1; i < pointCount; j = i, i++)//第一个点和最后一个点作为第一条线，之后是第一个点和第二个点作为第二条线，之后是第二个点与第三个点，第三个点与第四个点...  
+            {
+                p1 = polygonPoints[i];
+                p2 = polygonPoints[j];
+                if (checkPoint.Y < p2.Y)
+                {//p2在射线之上  
+                    if (p1.Y <= checkPoint.Y)
+                    {//p1正好在射线中或者射线下方  
+                        if ((checkPoint.Y - p1.Y) * (p2.X - p1.X) > (checkPoint.X - p1.X) * (p2.Y - p1.Y))//斜率判断,在P1和P2之间且在P1P2右侧  
+                        {
+                            //射线与多边形交点为奇数时则在多边形之内，若为偶数个交点时则在多边形之外。  
+                            //由于inside初始值为false，即交点数为零。所以当有第一个交点时，则必为奇数，则在内部，此时为inside=(!inside)  
+                            //所以当有第二个交点时，则必为偶数，则在外部，此时为inside=(!inside)  
+                            inside = (!inside);
+                        }
+                    }
+                }
+                else if (checkPoint.Y < p1.Y)
+                {
+                    //p2正好在射线中或者在射线下方，p1在射线上  
+                    if ((checkPoint.Y - p1.Y) * (p2.X - p1.X) < (checkPoint.X - p1.X) * (p2.Y - p1.Y))//斜率判断,在P1和P2之间且在P1P2右侧  
+                    {
+                        inside = (!inside);
+                    }
+                }
+            }
+            return inside;
+        }
+
+        /// <summary>
+        /// 判断线段与多边形是否有交点
+        /// </summary>
+        /// <param name="checkPointA">线段起点</param>
+        /// <param name="CheckPointB">线段终点</param>
+        /// <param name="polygonPoints">多边形</param>
+        /// <returns></returns>
+        public static bool IsSegmentInteractPolygon(Point checkPointA, Point checkPointB, List<Point> polygonPoints)
+        {
+            // 线段一头在多边形内部，一头在多边形外部
+            if (IsInPolygon(checkPointA, polygonPoints) && !IsInPolygon(checkPointB, polygonPoints)
+                || !IsInPolygon(checkPointA, polygonPoints) && IsInPolygon(checkPointB, polygonPoints))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 计算两个线段的交点
+        /// </summary>
+        /// <param name="checkPointA">1起点</param>
+        /// <param name="checkPointB">1终点</param>
+        /// <param name="checkPointC">2起点</param>
+        /// <param name="checkPointD">2终点</param>
+        /// <returns>交点坐标</returns>
+        public static Point CalCrossPoint(Point checkPointA, Point checkPointB, Point checkPointC, Point checkPointD)
+        {
+            double lambdaValue = ((checkPointC.X - checkPointA.X) -
+                                  (checkPointB.X - checkPointA.X)/(checkPointB.Y - checkPointA.Y) * (checkPointC.Y - checkPointB.Y))/
+                                 ((checkPointB.X - checkPointA.X)/(checkPointB.Y - checkPointA.Y)*
+                                  (checkPointD.Y - checkPointC.Y) - (checkPointD.X - checkPointC.X));
+            if (lambdaValue < 0 || lambdaValue > 1)
+            {
+                return new Point(-10000, -10000);
+            }
+            double tValue = ((checkPointC.X - checkPointA.X) + lambdaValue*(checkPointD.X - checkPointC.X))/
+                            (checkPointB.X - checkPointA.X);
+            if (tValue < 0 || tValue > 1)
+            {
+                return new Point(-10000, -10000);
+            }
+            else return new Point(
+                checkPointA.X + tValue * (checkPointB.X - checkPointA.X),
+                checkPointA.Y+ tValue * (checkPointB.Y - checkPointA.Y)
+                );
+        }
+
+        /// <summary>
+        /// 计算两个多边形经过bool运算后的多边形
+        /// </summary>
+        /// <param name="firstPolygon">第一个多边形</param>
+        /// <param name="secondPolygon">第二个多边形</param>
+        /// <param name="theClipType">多边形布尔运算的类型</param>
+        /// <param name="scale">使用的库函数均为整数下的操作，浮点数需要乘以一个放大倍数然后去整，这个就是放大倍数</param>
+        /// <returns>返回运算后的多边形组，注意是除以了放大倍数scale后的正确结果</returns>
+        public static List<Polygon> CalPolygonsBoolOp(List<Polygon> firstPolygon, List<Polygon> secondPolygon, ClipType theClipType, float scale = 1000)
+        {
+            Paths subjs = new Paths();
+            Paths clips = new Paths();
+
+            foreach (Polygon polygon in firstPolygon)
+            {
+                Path subj = new Path();
+                foreach (var point in polygon.Points)
+                {
+                    subj.Add(new IntPoint(point.X * scale, point.Y * scale));
+                }
+                subjs.Add(subj);
+            }
+            foreach (Polygon polygon in secondPolygon)
+            {
+                Path clip = new Path();
+                foreach (Point point in polygon.Points)
+                {
+                    clip.Add(new IntPoint(point.X * scale, point.Y * scale));
+                }
+                clips.Add(clip);
+            }
+
+            Paths solution = new Paths();
+            Clipper c = new Clipper();
+            c.AddPaths(subjs, PolyType.ptSubject, true);
+            c.AddPaths(clips, PolyType.ptClip, true);
+            c.Execute(theClipType, solution);
+
+            List<Polygon> calculatedPolygons = new List<Polygon>();
+            foreach (Path intPoints in solution)
+            {
+                Polygon polygonTmp = new Polygon();
+                foreach (IntPoint intPoint in intPoints)
+                {
+                    polygonTmp.Points.Add(new Point((double)intPoint.X / scale, (double)intPoint.Y / scale));
+                }
+                calculatedPolygons.Add(polygonTmp);
+            }
+
+            return calculatedPolygons;
+        }
+
+        /// <summary>
+        /// 计算两个多边形经过bool运算后的多边形,需要保证firstsketchInfoColl与secondsketchInfoColl所有的SketchInfo有相同的cellIndex
+        /// </summary>
+        /// <param name="firstPolygon">第一个多边形</param>
+        /// <param name="secondPolygon">第二个多边形</param>
+        /// <param name="theClipType">多边形布尔运算的类型</param>
+        /// <param name="scale">使用的库函数均为整数下的操作，浮点数需要乘以一个放大倍数然后去整，这个就是放大倍数</param>
+        /// <returns>返回运算后的多边形组，注意是除以了放大倍数scale后的正确结果</returns>
+        public static List<SketchInfo> CalPolygonsBoolOp(List<SketchInfo> firstsketchInfoColl, List<SketchInfo> secondsketchInfoColl, ClipType theClipType, int outCellIndex,  float scale = 1000)
+        {
+            Paths subjs = new Paths();
+            Paths clips = new Paths();
+
+            foreach (SketchInfo sketchInfo in firstsketchInfoColl)
+            {
+                Path subj = new Path();
+                foreach (var point in sketchInfo.vertexColl)
+                {
+                    subj.Add(new IntPoint(point.X * scale, point.Y * scale));
+                }
+                subjs.Add(subj);
+            }
+            foreach (SketchInfo sketchInfo in secondsketchInfoColl)
+            {
+                Path clip = new Path();
+                foreach (Point point in sketchInfo.vertexColl)
+                {
+                    clip.Add(new IntPoint(point.X * scale, point.Y * scale));
+                }
+                clips.Add(clip);
+            }
+
+            Paths solution = new Paths();
+            Clipper c = new Clipper();
+            c.AddPaths(subjs, PolyType.ptSubject, true);
+            c.AddPaths(clips, PolyType.ptClip, true);
+            c.Execute(theClipType, solution);
+
+            List<SketchInfo> calculatedPolygons = new List<SketchInfo>();
+            foreach (Path intPoints in solution)
+            {
+                SketchInfo polygonTmp = new SketchInfo(outCellIndex);
+                foreach (IntPoint intPoint in intPoints)
+                {
+                    polygonTmp.vertexColl.Add(new Point((double)intPoint.X / scale, (double)intPoint.Y / scale));
+                }
+                calculatedPolygons.Add(polygonTmp);
+            }
+
+            return calculatedPolygons;
+        }
+
+        public static Polygon CalCirclePoints(Point center, double radius, int lineNum = 0)
+        {
+            if (lineNum == 0)
+            {
+                lineNum = (int)Math.Round(radius) * 100; // 1~100 2~200 3 ~300
+            }
+            Polygon calculatedPolygon = new Polygon();
+            double angleFraction = Math.PI * 2 / lineNum;
+            for (int i = 0; i < lineNum; i++)
+            {
+                double angleTmp = i * angleFraction ;
+                calculatedPolygon.Points.Add(new Point(center.X + Math.Cos(angleTmp) * radius, center.Y + Math.Sin(angleTmp) * radius));
+            }
+            if (0 != calculatedPolygon.Points.Count)
+            {
+                return calculatedPolygon;
+            }
+            else
+            {
+                throw new Exception("生成圆形的多边形定点时出现未知错误");
+            }
+        }
+
+        public static SketchInfo CalCirclePoints(Point center, double radius, int cellIndex, int lineNum = 0)
+        {
+            if (lineNum == 0)
+            {
+                lineNum = (int)Math.Round(radius) * 10; // 1~10 2~20 3 ~30
+            }
+            SketchInfo calculatedPolygon = new SketchInfo(cellIndex);
+            double angleFraction = Math.PI * 2 / lineNum;
+            for (int i = 0; i < lineNum; i++)
+            {
+                double angleTmp = i * angleFraction;
+                calculatedPolygon.vertexColl.Add(new Point(center.X + Math.Cos(angleTmp) * radius, center.Y + Math.Sin(angleTmp) * radius));
+            }
+            if (0 != calculatedPolygon.vertexColl.Count)
+            {
+                return calculatedPolygon;
+            }
+            else
+            {
+                throw new Exception("生成圆形的多边形定点时出现未知错误");
+            }
+        }
     }
+
+    
 }

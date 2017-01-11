@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Text.RegularExpressions;
 
 namespace MCNPFileEditor.DataClassAndControl
 {
@@ -272,16 +273,13 @@ namespace MCNPFileEditor.DataClassAndControl
                                     int ourLocationNow = 0; // 下一个需要写入的universe的编号
                                     for (int j = lineNumTmp + 1; j < alllines.Count(); j++)
                                     {
-                                        if (alllines[j][0] != ' ' || alllines[j][1] != ' ' || alllines[j][2] != ' '
-                                            || alllines[j][3] != ' ' || alllines[j][4] != ' ') // 不是延续的行
+                                        if ((alllines[j][0] == ' ' && alllines[j][1] == ' ' && alllines[j][2] == ' ' && alllines[j][3] == ' ' && alllines[j][4] == ' ') ||
+                                            Regex.IsMatch(alllines[j], @" *&\s*") ||
+                                            (!Regex.IsMatch(alllines[j], @" *&\s*") && j - 1 >= 0 && Regex.IsMatch(alllines[j - 1], @" *&\s*")))
                                         {
                                             lineNumTmp = j - 1;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            lineNumTmp = j - 1;
-                                            allElement = alllines[j].Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
+                                            string alllinesjtmp = Regex.Replace(alllines[j], @"&", "");
+                                            allElement = alllinesjtmp.Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
                                             for (int mm = 0; mm < allElement.Length; mm++)
                                             {
                                                 // 使用了r
@@ -303,6 +301,11 @@ namespace MCNPFileEditor.DataClassAndControl
                                                     ourLocationNow++;
                                                 }
                                             }
+                                        }
+                                        else  // 非连续行
+                                        {
+                                            lineNumTmp = j - 1;
+                                            break;
                                         }
                                     }
 
@@ -329,8 +332,13 @@ namespace MCNPFileEditor.DataClassAndControl
                                         }
                                         else
                                         {
-                                            Cell newCell = new Cell(alllines[j], mode);
-                                            CellsCollectionInAPhantom.AllCells[newCell.CellIndex] = newCell;
+                                            if (Regex.IsMatch(alllines[j], @"^ *[C|c]"))
+                                                continue;
+                                            else
+                                            {
+                                                Cell newCell = new Cell(alllines[j], mode);
+                                                CellsCollectionInAPhantom.AllCells[newCell.CellIndex] = newCell;
+                                            }
                                         }
                                     }
                                 }
@@ -445,7 +453,7 @@ namespace MCNPFileEditor.DataClassAndControl
                 }
             }
         }
-
+        
         public void MoveOrgan(List<int> OrgansTobeMove, string organsMoveDirection, int organsMoceDis, int additionOrgan, bool shouldForceReplace)
         {
             if (OrgansTobeMove == null || (organsMoveDirection != "X" && organsMoveDirection != "Y" && organsMoveDirection != "Z"))
@@ -514,7 +522,7 @@ namespace MCNPFileEditor.DataClassAndControl
                         {
                             if (cellTempMatrix[i, j, k] != -1)
                             {
-                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] = (short) cellTempMatrix[i, j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] = (short)cellTempMatrix[i, j, k];
                             }
                         }
                     }
@@ -552,7 +560,8 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.WriteLine("C                               Cells cards");
                     sw.WriteLine("C * *****************************************************************************");
                     sw.WriteLine("888   0  2                          $ exterior - zero importance");
-                    sw.WriteLine("555   0 - 2     fill = 666            $ Others phantom box");
+                    sw.WriteLine("555   0 - 2     fill = " + RepeatStructureInAPhantom.RepCellIndex + "            $ Others phantom box");
+                    // RepeatStructureInAPhantom.RepCellIndex
                     sw.WriteLine("C * ***************Image data start from here*******************************");
                     sw.Write("C Voxel size : ");
                     sw.Write(RepeatStructureInAPhantom.ResolutionX.ToString("f3").PadLeft(7) + " X " +
@@ -562,7 +571,7 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.Write(RepeatStructureInAPhantom.DimX.ToString("f3").PadLeft(7) + " " +
                         RepeatStructureInAPhantom.DimY.ToString("f3").PadLeft(7) + " " +
                         RepeatStructureInAPhantom.DimZ.ToString("f3").PadLeft(7) + Environment.NewLine);
-                    sw.Write("666   0 -1 lat=1 u=666 fill=");
+                    sw.Write(Convert.ToString(RepeatStructureInAPhantom.RepCellIndex) + "   0 -1 lat=1 u=" + RepeatStructureInAPhantom.RepCellIndex + " fill=");
                     sw.Write(RepeatStructureInAPhantom.LowerBoundX.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundX.ToString() + " " +
                         RepeatStructureInAPhantom.LowerBoundY.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundY.ToString() + " " +
                         RepeatStructureInAPhantom.LowerBoundZ.ToString() + ":" + RepeatStructureInAPhantom.UpperBoundZ.ToString() + Environment.NewLine);
@@ -909,6 +918,42 @@ namespace MCNPFileEditor.DataClassAndControl
                 return RepeatMatrix_;
             }
         }
+
+        // 体模外边界外扩，不支持有靶区时的外扩
+        public void ExtendBorder(int extendLength, short voidNum = 150)
+        {
+            short[,,] RepeatMatrixTmp =
+                new short[DimZ + 2 * extendLength, DimY + 2 * extendLength, DimX + 2 * extendLength];
+            for (int i = 0; i < DimZ + 2 * extendLength; i++)
+            {
+                for (int j = 0; j < DimY + 2 * extendLength; j++)
+                {
+                    for (int k = 0; k < DimX + 2 * extendLength; k++)
+                    {
+                        RepeatMatrixTmp[i, j, k] = voidNum;
+                    }
+                }
+            }
+            for (int i = 0; i < DimZ; i++)
+            {
+                for (int j = 0; j < DimY; j++)
+                {
+                    for (int k = 0; k < DimX; k++)
+                    {
+                        RepeatMatrixTmp[i + extendLength, j + extendLength, k + extendLength] = RepeatMatrix[i, j, k];
+                    }
+                }
+            }
+            RepeatMatrix = null;
+            RepeatMatrix = RepeatMatrixTmp;
+            DimX = DimX + 2 * extendLength;
+            DimY = DimY + 2 * extendLength;
+            DimZ = DimZ + 2 * extendLength;
+
+            UpperBoundX = UpperBoundX + 2 * extendLength;
+            UpperBoundY = UpperBoundY + 2 * extendLength;
+            UpperBoundZ = UpperBoundZ + 2 * extendLength;
+        }
     }
 
     /// <summary>
@@ -1145,6 +1190,17 @@ namespace MCNPFileEditor.DataClassAndControl
             cellIndex = indexcell;
             vertexColl.Add(insertpoint);
             maskType = masktype;
+        }
+
+        public SketchInfo(int indexcell)
+        {
+            if (vertexColl == null)
+            {
+                vertexColl = new List<Point>();
+            }
+
+            cellIndex = indexcell;
+            maskType = MaskType.PolygonType;
         }
     }
 
