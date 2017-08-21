@@ -28,9 +28,6 @@ namespace MCNPFileEditor.CrossSectionImageShow
         public CrossSectionImageBigShow(Phantom selectedPhantom, CrossSection selectedCrossSection)
         {
             InitializeComponent();
-
-            FrontalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
-            FrontalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
             FrontalImage.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
             FrontalImage.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
 
@@ -43,12 +40,16 @@ namespace MCNPFileEditor.CrossSectionImageShow
             double xScaleValue = 1;
             double yScaleValue = 1;
             double zScaleValue = 1;
+
             double minResolutionValue = selectedCrossSection.ResolutionX < selectedCrossSection.ResolutionY ? selectedCrossSection.ResolutionX : selectedCrossSection.ResolutionY;
             minResolutionValue = minResolutionValue < selectedCrossSection.ResolutionZ ? minResolutionValue : selectedCrossSection.ResolutionZ;
 
             xScaleValue = selectedCrossSection.ResolutionX / minResolutionValue;
             yScaleValue = selectedCrossSection.ResolutionY / minResolutionValue;
             zScaleValue = selectedCrossSection.ResolutionZ / minResolutionValue;
+
+            FrontalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ * zScaleValue;
+            FrontalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX * xScaleValue;
 
             //TransverseMatrixTransform
 

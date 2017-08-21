@@ -8,13 +8,14 @@
         Title="CrossSectionImageBigShow" Height="768" Width="1366">
     <Grid>
         <Viewbox>
-                <Canvas x:Name="FrontalCanvas" Background="Transparent" Focusable="True">
+            <Viewbox.RenderTransform>
+                <TransformGroup>
+                    <MatrixTransform x:Name="FrontalMatrixTransform"/>
+                </TransformGroup>
+            </Viewbox.RenderTransform>
+            <Canvas x:Name="FrontalCanvas" Background="Transparent" Focusable="True">
                     <Image x:Name="FrontalImage">
-                        <Image.RenderTransform>
-                            <TransformGroup>
-                                <MatrixTransform x:Name="FrontalMatrixTransform"/>
-                            </TransformGroup>
-                        </Image.RenderTransform>
+                        
                     </Image>
                 </Canvas>
             </Viewbox>

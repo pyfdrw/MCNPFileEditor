@@ -64,8 +64,9 @@ namespace MCNPFileEditor.DataClassAndControl
             }
         }
 
-        public static bool[,] SketchMask(List<Point> Points, int width, int height)
+        public static bool[,] SketchMask(List<Point> PointsIn, int width, int height)
         {
+            List<Point> Points = new List<Point>(PointsIn);
             if (Points == null)
             {
                 return null;
@@ -188,8 +189,8 @@ namespace MCNPFileEditor.DataClassAndControl
                         }
                         else
                         {
-                            SecondBound = (int)Math.Ceiling(Point2.Y - 0.5);
-                            FirstBound = (int)Math.Floor(Point1.Y - 0.5);
+                            FirstBound = (int)Math.Ceiling(Point2.Y - 0.5);
+                            SecondBound = (int)Math.Floor(Point1.Y - 0.5);
                         }
 
                         // 和扫描线没有交点的直线，直接跳过
@@ -198,9 +199,20 @@ namespace MCNPFileEditor.DataClassAndControl
                             continue;
                         }
 
-                        int lowerone = Math.Min(FirstBound, SecondBound);
-                        int biggerone = Math.Max(FirstBound, SecondBound);
+                        int lowerone = 0;
+                        int biggerone = 0;
 
+                        if (SecondBound < FirstBound)
+                        {
+                            lowerone = Math.Min(FirstBound, SecondBound);
+                            biggerone = Math.Min(FirstBound, SecondBound);
+                        }
+                        else
+                        {
+                            lowerone = Math.Min(FirstBound, SecondBound);
+                            biggerone = Math.Max(FirstBound, SecondBound);
+                        }
+                        
                         tagEdge firstTagEdge = new tagEdge();
                         firstTagEdge.dx = (Point2.Y - Point1.Y) / (Point2.X - Point1.X);
                         firstTagEdge.xi = Point2.X - (Point2.Y - lowerone - 0.5) * (Point2.X - Point1.X) / (Point2.Y - Point1.Y);
@@ -208,8 +220,8 @@ namespace MCNPFileEditor.DataClassAndControl
                         switch (JudgeVectorType(Point1, Point2, Point3))
                         {
                             case VectorType.NormalVector:
-                                lowerone = Math.Min(FirstBound, SecondBound);
-                                biggerone = Math.Max(FirstBound, SecondBound);
+                                //lowerone = Math.Min(FirstBound, SecondBound);
+                                //biggerone = Math.Max(FirstBound, SecondBound);
                                 AET[lowerone].Add(firstTagEdge);
                                 for (lowerone++; lowerone <= biggerone; lowerone++)
                                 {
@@ -232,8 +244,8 @@ namespace MCNPFileEditor.DataClassAndControl
                                 {
                                     SecondBound--;
                                 }
-                                lowerone = Math.Min(FirstBound, SecondBound);
-                                biggerone = Math.Max(FirstBound, SecondBound);
+                                //lowerone = Math.Min(FirstBound, SecondBound);
+                                //biggerone = Math.Max(FirstBound, SecondBound);
                                 AET[lowerone].Add(firstTagEdge);
                                 for (lowerone++; lowerone <= biggerone; lowerone++)
                                 {
@@ -248,8 +260,8 @@ namespace MCNPFileEditor.DataClassAndControl
                                 firstTagEdge = null;
                                 break;
                             case VectorType.TopOrBottomVector:
-                                lowerone = Math.Min(FirstBound, SecondBound);
-                                biggerone = Math.Max(FirstBound, SecondBound);
+                                //lowerone = Math.Min(FirstBound, SecondBound);
+                                //biggerone = Math.Max(FirstBound, SecondBound);
                                 AET[lowerone].Add(firstTagEdge);
                                 for (lowerone++; lowerone <= biggerone; lowerone++)
                                 {
@@ -277,8 +289,8 @@ namespace MCNPFileEditor.DataClassAndControl
                                         SecondBound--;
                                     }
                                 }
-                                lowerone = Math.Min(FirstBound, SecondBound);
-                                biggerone = Math.Max(FirstBound, SecondBound);
+                                //lowerone = Math.Min(FirstBound, SecondBound);
+                                //biggerone = Math.Max(FirstBound, SecondBound);
                                 AET[lowerone].Add(firstTagEdge);
                                 for (lowerone++; lowerone <= biggerone; lowerone++)
                                 {
@@ -315,7 +327,7 @@ namespace MCNPFileEditor.DataClassAndControl
                         if (AET[i].Count % 2 != 0)
                         {
                             // TODO 进行错误检查
-                            // throw new Exception("交点个数应该是偶数个!");
+                            throw new Exception("交点个数应该是偶数个!");
                         }
                         else
                         {
@@ -847,7 +859,7 @@ namespace MCNPFileEditor.DataClassAndControl
         {
             if (lineNum == 0)
             {
-                lineNum = (int)Math.Round(radius) * 100; // 1~100 2~200 3 ~300
+                lineNum = ((int)Math.Round(radius) == 0 ? 1 : (int)Math.Round(radius)) * 10; // 1~10 2~20 3 ~30
             }
             Polygon calculatedPolygon = new Polygon();
             double angleFraction = Math.PI * 2 / lineNum;
@@ -870,7 +882,7 @@ namespace MCNPFileEditor.DataClassAndControl
         {
             if (lineNum == 0)
             {
-                lineNum = (int)Math.Round(radius) * 10; // 1~10 2~20 3 ~30
+                lineNum = ((int)Math.Round(radius) == 0 ? 1 : (int)Math.Round(radius)) * 10; // 1~10 2~20 3 ~30
             }
             SketchInfo calculatedPolygon = new SketchInfo(cellIndex);
             double angleFraction = Math.PI * 2 / lineNum;

@@ -120,20 +120,14 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 SelectedPhantomCellinfoListView.ItemsSource = selectedPhantom.CellsCollectionInAPhantom.AllCells.Where(x => (x != null && x.IsCellEffective == true));
 
                 // 更新截面图像和画板的尺寸
-                TransverseCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimY;
-                TransverseCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
                 TransverseImage.Height = selectedPhantom.RepeatStructureInAPhantom.DimY;
                 TransverseImage.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
                 // TransverseSketchCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimY;
                 // TransverseSketchCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
-
-                FrontalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
-                FrontalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
+                
                 FrontalImage.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
                 FrontalImage.Width = selectedPhantom.RepeatStructureInAPhantom.DimX;
-
-                SagittalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
-                SagittalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimY;
+                
                 SagittalImage.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ;
                 SagittalImage.Width = selectedPhantom.RepeatStructureInAPhantom.DimY;
 
@@ -167,6 +161,13 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 yScaleValue = selectedCrossSection.ResolutionY / minResolutionValue;
                 zScaleValue = selectedCrossSection.ResolutionZ / minResolutionValue;
 
+                TransverseCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimY * yScaleValue;
+                TransverseCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX * xScaleValue;
+                FrontalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ * zScaleValue;
+                FrontalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimX * xScaleValue;
+                SagittalCanvas.Height = selectedPhantom.RepeatStructureInAPhantom.DimZ * zScaleValue;
+                SagittalCanvas.Width = selectedPhantom.RepeatStructureInAPhantom.DimY * yScaleValue;
+                
                 //TransverseMatrixTransform
                 Matrix mx1 = new Matrix(-xScaleValue, 0, 0, -yScaleValue, selectedCrossSection.TransverseWidth * xScaleValue, selectedCrossSection.TransverseHeight * yScaleValue);
                 TransverseMatrixTransform.Matrix = mx1;
@@ -174,9 +175,15 @@ namespace MCNPFileEditor.CrossSectionImageShow
                 //FrontalMatrixTransform
                 Matrix mx2 = new Matrix(-xScaleValue, 0, 0, -zScaleValue, selectedCrossSection.FrontalWidth * xScaleValue, selectedCrossSection.FrontalHeight * zScaleValue);
                 FrontalMatrixTransform.Matrix = mx2;
+                //ScaleTransform frontalScaleTransform = new ScaleTransform(xScaleValue, zScaleValue);
+                //FrontalTransformGroup.Children.Clear();
+                // FrontalTransformGroup.Children.Add(mx2);
 
                 //SagittalMatrixTransform
                 Matrix mx3 = new Matrix(-yScaleValue, 0, 0, -zScaleValue, selectedCrossSection.SagittalWidth * yScaleValue, selectedCrossSection.SagittalHeight * zScaleValue);
+                //ScaleTransform sagittalScaleTransform = new ScaleTransform(yScaleValue, zScaleValue);
+                //SagittalTransformGroup.Children.Clear();
+                //SagittalTransformGroup.Children.Add(sagittalScaleTransform);
                 SagittalMatrixTransform.Matrix = mx3;
 
                 // 层数显示绑定

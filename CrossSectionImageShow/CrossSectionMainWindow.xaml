@@ -176,18 +176,18 @@
                 <Grid Grid.Column="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
 
-                    <GridSplitter Height="3" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black" />
+                    <GridSplitter Grid.Row="1" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"  Background="Black" Cursor="SizeNS" />
 
                     <Grid Grid.Row="0">
-                        <Viewbox>
-                            <Canvas x:Name="FrontalCanvas" MouseWheel="FrontalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="FrontalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="FrontalCanvas_PreviewKeyDown">
+                        <Viewbox Margin="2">
+                            <Canvas x:Name="FrontalCanvas" MouseWheel="FrontalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="FrontalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="FrontalCanvas_PreviewKeyDown" ClipToBounds="True">
                                 <Image x:Name="FrontalImage">
                                     <Image.RenderTransform>
-                                        <TransformGroup>
+                                        <TransformGroup x:Name="FrontalTransformGroup">
                                             <MatrixTransform x:Name="FrontalMatrixTransform"/>
                                         </TransformGroup>
                                     </Image.RenderTransform>
@@ -220,11 +220,12 @@
                     </Grid>
 
                     <Grid Grid.Row="2">
-                        <Viewbox>
+                        <Viewbox Margin="2">
+                            
                             <Canvas x:Name="SagittalCanvas" MouseWheel="SagittalCanvas_MouseWheel" Background="Transparent" MouseLeftButtonUp="SagittalCanvas_MouseLeftButtonUp" Focusable="True" PreviewKeyDown="SagittalCanvas_PreviewKeyDown">
                                 <Image x:Name="SagittalImage">
                                     <Image.RenderTransform>
-                                        <TransformGroup>
+                                        <TransformGroup x:Name="SagittalTransformGroup">
                                             <MatrixTransform x:Name="SagittalMatrixTransform"/>
                                         </TransformGroup>
                                     </Image.RenderTransform>
