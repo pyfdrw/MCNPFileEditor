@@ -546,9 +546,13 @@ namespace MCNPFileEditor.DataClassAndControl
             }
         }
 
+        /// <summary>
+        /// 按照MCNP输入文件格式输出文件
+        /// </summary>
+        /// <param name="outputfilePath">输出文件完整路径</param>
         public void OutPutPhantom(string outputfilePath)
         {
-            if (outputfilePath != null && outputfilePath != "" && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+            if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
                 RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
             {
                 using (var fs = new FileStream(outputfilePath, FileMode.Create))
@@ -667,6 +671,113 @@ namespace MCNPFileEditor.DataClassAndControl
                         0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimZ * RepeatStructureInAPhantom.ResolutionZ).ToString("f2").PadRight(6, ' '));
                     sw.Write("  $ Box" + Environment.NewLine);
                     sw.Write("3    pz  -1e2    $ XY plane used in universe definition");
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 按照Archer的输入文件需求输出体模几何
+        /// </summary>
+        /// <param name="outputfilePath">输出文件完整路径</param>
+        public void OutPutPhantomForArcher(string outputfilePath)
+        {
+            if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+                RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
+            {
+                using (var fs = new FileStream(outputfilePath, FileMode.Create))
+                {
+                    StreamWriter sw = new StreamWriter(fs);
+
+                    sw.WriteLine(outputfilePath);
+                    sw.WriteLine("C * *****************************************************************************");
+                    sw.WriteLine("C                               Geo For Archer");
+                    sw.WriteLine("C * *****************************************************************************");
+                    sw.WriteLine("num-voxel-x    " + " = " + RepeatStructureInAPhantom.DimX.ToString("f3").PadLeft(7));
+                    sw.WriteLine("num-voxel-y    " + " = " + RepeatStructureInAPhantom.DimY.ToString("f3").PadLeft(7));
+                    sw.WriteLine("num-voxel-z    " + " = " + RepeatStructureInAPhantom.DimZ.ToString("f3").PadLeft(7));
+                    sw.WriteLine("dim-voxel-x    " + " = " + RepeatStructureInAPhantom.ResolutionX.ToString("f3").PadLeft(7));
+                    sw.WriteLine("dim-voxel-y    " + " = " + RepeatStructureInAPhantom.ResolutionY.ToString("f3").PadLeft(7));
+                    sw.WriteLine("dim-voxel-z    " + " = " + RepeatStructureInAPhantom.ResolutionZ.ToString("f3").PadLeft(7));
+                    // RepeatStructureInAPhantom.RepCellIndex
+                    sw.WriteLine("C * ***************Image data start from here*******************************");
+                    int lastVoxel = -1;
+                    int samevoxelcount = 0;
+                    string newline = "     ";
+
+                    for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                    {
+                        for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                        {
+                            for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                            {
+                                if (RepeatStructureInAPhantom.RepeatMatrix[i, j, k] == lastVoxel)
+                                {
+                                    lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                    samevoxelcount++;
+                                }
+                                else
+                                {
+                                    // 新的体素
+                                    if (samevoxelcount == 0)
+                                    {
+                                        newline += (RepeatStructureInAPhantom.RepeatMatrix[i, j, k].ToString() + " ");
+                                        CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                        lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    }
+                                    else
+                                    {
+                                        CellsCollectionInAPhantom.AllCells[RepeatStructureInAPhantom.RepeatMatrix[i, j, k]].NumSum++;
+                                        newline += (samevoxelcount.ToString() + "r ");
+                                        samevoxelcount = 0;
+                                        newline += (RepeatStructureInAPhantom.RepeatMatrix[i, j, k].ToString() + " ");
+                                        lastVoxel = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                    }
+                                    // 一行不要超过80字符
+                                    if (newline.Length >= 69)
+                                    {
+                                        sw.Write(newline + Environment.NewLine);
+                                        newline = "     ";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (samevoxelcount != 0)
+                    {
+                        newline += (" " + samevoxelcount.ToString() + "r");
+                    }
+                    if (newline != "     ")
+                    {
+                        sw.Write(newline + Environment.NewLine);
+                        newline = "";
+                    }
+
+                    foreach (var item in CellsCollectionInAPhantom.AllCells)
+                    {
+                        if (item == null)
+                        {
+                            continue;
+                        }
+                        if (item.MaterialIndex == 0)
+                        {
+                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + "          " + item.SurfaceComposation.ToString("d").PadRight(5) +
+                                     "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
+                                     "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
+                                     "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                        }
+                        else
+                        {
+                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + item.DensityValue.ToString("f6").PadRight(10) +
+                                     item.SurfaceComposation.ToString("d").PadRight(5) +
+                                     "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
+                                     "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
+                                     "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                        }
+                    }
+
                     sw.Flush();
                     sw.Close();
                 }
