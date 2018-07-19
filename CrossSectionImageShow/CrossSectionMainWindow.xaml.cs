@@ -2642,16 +2642,19 @@ namespace MCNPFileEditor.CrossSectionImageShow
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
-            sfd.RestoreDirectory = true;
-            sfd.OverwritePrompt = true;
-            sfd.CheckPathExists = true;
-            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                string outfilename = sfd.FileName;
-                selectedPhantom.OutPutPhantom(outfilename);
-                MessageBox.Show("完成输出");
-            }
+            //System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+            //sfd.RestoreDirectory = true;
+            //sfd.OverwritePrompt = true;
+            //sfd.CheckPathExists = true;
+            //if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            //{
+            //    string outfilename = sfd.FileName;
+            //    selectedPhantom.OutPutPhantom(outfilename);
+            //    MessageBox.Show("完成输出");
+            //}
+
+            OutputWindow outputWindow = new OutputWindow(phantomsCollection ,selectedPhantom);
+            outputWindow.ShowDialog();
         }
 
         List<int> OrgansTobeMove = new List<int>() { 4, 6, 74, 96, 98, 111, 112, 116, 117, 118, 122, 123 };
@@ -2866,7 +2869,13 @@ namespace MCNPFileEditor.CrossSectionImageShow
             // throw new NotImplementedException();
         }
 
-        
+
+        private void outputPhantomToBin_buttomClick(object sender, RoutedEventArgs e)
+        {
+            selectedPhantom.OutputPhantomToBinaryFile();
+
+            MessageBox.Show("Finished!");
+        }
     }
 
     public class CrossSection : INotifyPropertyChanged

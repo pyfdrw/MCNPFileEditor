@@ -184,7 +184,8 @@ namespace MCNPFileEditor.DataClassAndControl
                 string[] alllines = File.ReadAllLines(filePath);
                 int lintCount = alllines.Count();
 
-                PhantomName = Path.GetFileNameWithoutExtension(filePath);
+                PhantomName = Path.GetFileName(filePath);
+                PhantomName = Regex.Replace(PhantomName, @"[^A-Za-z0-9]", "_"); // 删除特殊字符
                 FilePath = filePath;
 
                 int lineNumTmp = 1; // 跳过第一行
@@ -359,9 +360,20 @@ namespace MCNPFileEditor.DataClassAndControl
                         string[] allElement = alllines[lineNumTmp].Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
                         if (allElement[0].Equals("1") && allElement[1].ToLower().Equals("rpp"))
                         {
-                            RepeatStructureInAPhantom.ResolutionX = (float)Convert.ToDouble(allElement[3]);
-                            RepeatStructureInAPhantom.ResolutionY = (float)Convert.ToDouble(allElement[5]);
-                            RepeatStructureInAPhantom.ResolutionZ = (float)Convert.ToDouble(allElement[7]);
+                            // 解析填充使用的Voxel的边界和尺寸
+                            RepeatStructureInAPhantom.VoxelLowerBoundX = (float)Convert.ToDouble(allElement[2]);
+                            RepeatStructureInAPhantom.VoxelUpperBoundX = (float)Convert.ToDouble(allElement[3]);
+                            RepeatStructureInAPhantom.VoxelLowerBoundY = (float)Convert.ToDouble(allElement[4]);
+                            RepeatStructureInAPhantom.VoxelUpperBoundY = (float)Convert.ToDouble(allElement[5]);
+                            RepeatStructureInAPhantom.VoxelLowerBoundZ = (float)Convert.ToDouble(allElement[6]);
+                            RepeatStructureInAPhantom.VoxelUpperBoundZ = (float)Convert.ToDouble(allElement[7]);
+                            
+                            RepeatStructureInAPhantom.ResolutionX = Math.Abs(
+                                RepeatStructureInAPhantom.VoxelUpperBoundX - RepeatStructureInAPhantom.VoxelLowerBoundX);
+                            RepeatStructureInAPhantom.ResolutionY = Math.Abs(
+                                RepeatStructureInAPhantom.VoxelUpperBoundY - RepeatStructureInAPhantom.VoxelLowerBoundY);
+                            RepeatStructureInAPhantom.ResolutionZ = Math.Abs(
+                                RepeatStructureInAPhantom.VoxelUpperBoundZ - RepeatStructureInAPhantom.VoxelLowerBoundZ);
                             break;
                         }
                     }
@@ -661,14 +673,22 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.Write("C                               Surface cards" + Environment.NewLine);
                     sw.Write("C ******************************************************************************" + Environment.NewLine);
                     sw.Write("1    rpp ");
-                    sw.Write(0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionX.ToString("f2").PadRight(6, ' ') +
-                        0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionY.ToString("f2").PadRight(6, ' ') +
-                        0.ToString("f2").PadRight(6, ' ') + RepeatStructureInAPhantom.ResolutionZ.ToString("f2").PadRight(6, ' '));
+                    // 0.ToString("f2").PadRight(6, ' ') +
+                    sw.Write(RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') +
+                             RepeatStructureInAPhantom.VoxelUpperBoundX.ToString("f3").PadRight(6, ' ') +
+                             RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') +
+                             RepeatStructureInAPhantom.VoxelUpperBoundY.ToString("f3").PadRight(6, ' ') +
+                             RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') +
+                             RepeatStructureInAPhantom.VoxelUpperBoundZ.ToString("f3").PadRight(6, ' '));
                     sw.Write("  $ Voxel size" + Environment.NewLine);
                     sw.Write("2    rpp ");
-                    sw.Write(0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX).ToString("f2").PadRight(6, ' ') +
-                        0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY).ToString("f2").PadRight(6, ' ') +
-                        0.ToString("f2").PadRight(6, ' ') + (RepeatStructureInAPhantom.DimZ * RepeatStructureInAPhantom.ResolutionZ).ToString("f2").PadRight(6, ' '));
+                    sw.Write(
+                        RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + 
+                        (RepeatStructureInAPhantom.VoxelLowerBoundX + RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX).ToString("f2").PadRight(6, ' ') +
+                        RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + 
+                        (RepeatStructureInAPhantom.VoxelLowerBoundY + RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY).ToString("f2").PadRight(6, ' ') +
+                        RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') + 
+                        (RepeatStructureInAPhantom.VoxelLowerBoundZ + RepeatStructureInAPhantom.DimZ * RepeatStructureInAPhantom.ResolutionZ).ToString("f2").PadRight(6, ' '));
                     sw.Write("  $ Box" + Environment.NewLine);
                     sw.Write("3    pz  -1e2    $ XY plane used in universe definition");
                     sw.Flush();
@@ -683,25 +703,21 @@ namespace MCNPFileEditor.DataClassAndControl
         /// <param name="outputfilePath">输出文件完整路径</param>
         public void OutPutPhantomForArcher(string outputfilePath)
         {
+            // 输出的Archer文件默认填充的Voxel起点是0(即只使用Resolution数值而不是使用VoxelLowerBound的数值)，而不是文件中定义的填充Voxel的空间位置
             if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
                 RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
             {
                 using (var fs = new FileStream(outputfilePath, FileMode.Create))
                 {
                     StreamWriter sw = new StreamWriter(fs);
-
-                    sw.WriteLine(outputfilePath);
-                    sw.WriteLine("C * *****************************************************************************");
-                    sw.WriteLine("C                               Geo For Archer");
-                    sw.WriteLine("C * *****************************************************************************");
-                    sw.WriteLine("num-voxel-x    " + " = " + RepeatStructureInAPhantom.DimX.ToString("f3").PadLeft(7));
-                    sw.WriteLine("num-voxel-y    " + " = " + RepeatStructureInAPhantom.DimY.ToString("f3").PadLeft(7));
-                    sw.WriteLine("num-voxel-z    " + " = " + RepeatStructureInAPhantom.DimZ.ToString("f3").PadLeft(7));
-                    sw.WriteLine("dim-voxel-x    " + " = " + RepeatStructureInAPhantom.ResolutionX.ToString("f3").PadLeft(7));
-                    sw.WriteLine("dim-voxel-y    " + " = " + RepeatStructureInAPhantom.ResolutionY.ToString("f3").PadLeft(7));
-                    sw.WriteLine("dim-voxel-z    " + " = " + RepeatStructureInAPhantom.ResolutionZ.ToString("f3").PadLeft(7));
+                    
+                    sw.Write("num-voxel-x    " + " = " + RepeatStructureInAPhantom.DimX.ToString().PadLeft(7) + '\n');
+                    sw.Write("num-voxel-y    " + " = " + RepeatStructureInAPhantom.DimY.ToString().PadLeft(7) + '\n');
+                    sw.Write("num-voxel-z    " + " = " + RepeatStructureInAPhantom.DimZ.ToString().PadLeft(7) + '\n');
+                    sw.Write("dim-voxel-x    " + " = " + RepeatStructureInAPhantom.ResolutionX.ToString("f3").PadLeft(7) + '\n');
+                    sw.Write("dim-voxel-y    " + " = " + RepeatStructureInAPhantom.ResolutionY.ToString("f3").PadLeft(7) + '\n');
+                    sw.Write("dim-voxel-z    " + " = " + RepeatStructureInAPhantom.ResolutionZ.ToString("f3").PadLeft(7) + '\n');
                     // RepeatStructureInAPhantom.RepCellIndex
-                    sw.WriteLine("C * ***************Image data start from here*******************************");
                     int lastVoxel = -1;
                     int samevoxelcount = 0;
                     string newline = "     ";
@@ -738,7 +754,7 @@ namespace MCNPFileEditor.DataClassAndControl
                                     // 一行不要超过80字符
                                     if (newline.Length >= 69)
                                     {
-                                        sw.Write(newline + Environment.NewLine);
+                                        sw.Write(newline + '\n');
                                         newline = "     ";
                                     }
                                 }
@@ -751,35 +767,253 @@ namespace MCNPFileEditor.DataClassAndControl
                     }
                     if (newline != "     ")
                     {
-                        sw.Write(newline + Environment.NewLine);
+                        sw.Write(newline + '\n');
                         newline = "";
                     }
+                    
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
+        }
 
-                    foreach (var item in CellsCollectionInAPhantom.AllCells)
+        public void OutputPhantomToBinaryFile(string outputfilePath = "phantom.bin")
+        {
+            BinaryWriter bw;
+            try
+            {
+                bw = new BinaryWriter(new FileStream(outputfilePath, FileMode.Create));
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message + "Cannot create file.");
+                return;
+            }
+
+            for (int i = 0; i < RepeatStructureInAPhantom.DimZ; ++i)
+            {
+                //for (int j = RepeatStructureInAPhantom.DimY - 1; j >= 0; --j)
+                for (int j = 0; j < RepeatStructureInAPhantom.DimY; ++j)
+                {
+                    //for (int k = RepeatStructureInAPhantom.DimX - 1; k >= 0; --k)
+                    for (int k = 0; k < RepeatStructureInAPhantom.DimX; ++k)
                     {
-                        if (item == null)
+                        bw.Write(RepeatStructureInAPhantom.RepeatMatrix[i, j, k]);
+                    }
+                }
+            }
+
+            bw.Flush();
+            bw.Close();
+        }
+
+        /// <summary>
+        /// 生成tally文件
+        /// </summary>
+        /// <param name="outputfilePath">输出文件完整路径</param>
+        public void OutputTallyForArcher(string outputfilePath)
+        {
+            if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+                RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
+            {
+                using (var fs = new FileStream(outputfilePath, FileMode.Create))
+                {
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        sw.Write("organ-dose-start 16" + '\n');
+                        sw.Write("f6-p" + '\n');
+                        foreach (var item in CellsCollectionInAPhantom.AllCells)
                         {
-                            continue;
+                            if (item == null)
+                            {
+                                continue;
+                            }
+                            if (item.NumSum == 0)
+                            {
+                                continue;
+                            }
+                            if (item.MaterialIndex == 0)  // 材料为0，直接略过
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                sw.Write(item.OrganName.PadRight(80) + " = " + item.CellIndex + '\n');
+                            }
                         }
-                        if (item.MaterialIndex == 0)
+                        sw.Write("organ-dose-end" + "\n\n");
+                        
+                        //F4 tally cards
+                        sw.Write(OutputInneedParameter.F4TallyCards + '\n');
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 生成universe_to_material文件
+        /// </summary>
+        /// <param name="outputfilePath">输出文件完整路径</param>
+        public void Outputuniverse_to_materialForArcher(string outputfilePath)
+        {
+            if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+                RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
+            {
+                using (var fs = new FileStream(outputfilePath, FileMode.Create))
+                {
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        sw.Write("c universe       material   density" + '\n');
+                        sw.Write("99998   55      -2.7" + '\n');  // AL bowtie filter
+                        sw.Write("99999   99999   -0.00120479" + '\n');  // Air outside
+
+                        foreach (var item in CellsCollectionInAPhantom.AllCells)
                         {
-                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + "          " + item.SurfaceComposation.ToString("d").PadRight(5) +
-                                     "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
-                                     "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
-                                     "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                            if (item == null)
+                            {
+                                continue;
+                            }
+                            if (item.NumSum == 0)
+                            {
+                                continue;
+                            }
+                            if (item.MaterialIndex <= 0)  // 材料为0，直接略过
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                sw.Write($"{item.UniverseIndex,8}{item.MaterialIndex,8}{item.DensityValue,20:F6}" + '\n');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 生成run.sh文件
+        /// </summary>
+        /// <param name="outputfilePath">输出文件完整路径</param>
+        /// <param name="OneRunshParameters">控制选项</param>
+        public void OutputrunshForArcher(string outputfilePath, usercodeProperties OneUsercodeProperties, outputFileName OneOutputFileName, runshParameters OneRunshParameters)
+        {
+            if (!string.IsNullOrEmpty(outputfilePath) && Directory.Exists(Path.GetDirectoryName(outputfilePath)) &&
+                RepeatStructureInAPhantom != null && CellsCollectionInAPhantom != null)
+            {
+                // 创建输出文件夹
+                try
+                {
+                    string dir = Path.GetDirectoryName(outputfilePath);
+                    Directory.CreateDirectory(Path.Combine(dir, "output_cpu"));
+                    Directory.CreateDirectory(Path.Combine(dir, "output_gpu"));
+                }
+                catch (Exception e)
+                {
+                    //
+                }
+                using (var fs = new FileStream(outputfilePath, FileMode.Create))
+                {
+                    if (OneUsercodeProperties.ct_scanner_motion_type.Trim() == "axial")  // 层扫
+                    {
+                        if (OneRunshParameters.Scanner.Trim() == "10-head") { OneRunshParameters.ct_scanner_z_translation_delta = 1; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-body") { OneRunshParameters.ct_scanner_z_translation_delta = 2; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-body-old") { OneRunshParameters.ct_scanner_z_translation_delta = 2; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-head") { OneRunshParameters.ct_scanner_z_translation_delta = 2; }
+                        if (OneRunshParameters.Scanner.Trim() == "1.25-head") { OneRunshParameters.ct_scanner_z_translation_delta = 0.125M; }
+                        if (OneRunshParameters.Scanner.Trim() == "5-body") { OneRunshParameters.ct_scanner_z_translation_delta = 0.5M; }
+                        if (OneRunshParameters.Scanner.Trim() == "5-head") { OneRunshParameters.ct_scanner_z_translation_delta = 0.5M; }
+                        if (OneRunshParameters.Scanner.Trim() == "10-body") { OneRunshParameters.ct_scanner_z_translation_delta = 1; }
+                    }
+                    else  // 螺旋扫描
+                    {
+                        if (OneRunshParameters.Scanner.Trim() == "10-head") { OneRunshParameters.ct_scanner_z_translation_delta = 1.0M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-body") { OneRunshParameters.ct_scanner_z_translation_delta = 2.0M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-body-old") { OneRunshParameters.ct_scanner_z_translation_delta = 2.0M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "20-head") { OneRunshParameters.ct_scanner_z_translation_delta = 2.0M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "1.25-head") { OneRunshParameters.ct_scanner_z_translation_delta = 0.125M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "5-body") { OneRunshParameters.ct_scanner_z_translation_delta = 0.5M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "5-head") { OneRunshParameters.ct_scanner_z_translation_delta = 0.5M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                        if (OneRunshParameters.Scanner.Trim() == "10-body") { OneRunshParameters.ct_scanner_z_translation_delta = 1.0M / OneUsercodeProperties.ct_scanner_custom_num_projection; }
+                    }
+
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        sw.Write(@"#!/bin/bash" + '\n');
+                        sw.Write(@"set -e" + '\n');
+                        sw.Write('\n');
+                        sw.Write(@"export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib64:${ARCHER_INSTALL_PATH}/lib/Release" + '\n');
+                        sw.Write(@"BIN=${ARCHER_INSTALL_PATH}/bin/Release/ct-cpu" + '\n');
+                        sw.Write(@"DATA=${ARCHER_INSTALL_PATH}/data" + '\n');
+                        sw.Write('\n');
+                        sw.Write(@"# run cpu program" + '\n');
+                        sw.Write(@"${BIN} \" + '\n');
+                        sw.Write(@"--user-code-path=" + OneOutputFileName.UsercodeFilePath + @" \" + '\n');
+                        sw.Write(@"--xs-dir=${DATA} \" + '\n');
+                        sw.Write(@"--result-path=output_cpu/result_tally.csv \" + '\n');
+                        sw.Write(@"--rsd-path=output_cpu/result_rsd.csv \" + '\n');
+                        sw.Write(@"--logbook-path=output_cpu/logbook.txt \" + '\n');
+                        sw.Write(@"--source-spectrum-path=${DATA}/application/ct/kVp/" + OneRunshParameters.Spectrum + @" \" + '\n');
+                        //sw.Write(@"--source-spectrum-path=${DATA}/application/ct/kVp/120 \" + '\n');
+                        sw.Write(@"--ct-scanner-path=${DATA}/application/ct/ct_scanner/ge_lightspeed_pro_16/" + OneRunshParameters.Scanner + @" \" + '\n');
+                        //sw.Write(@"--ct-scanner-path=${DATA}/application/ct/ct_scanner/ge_lightspeed_pro_16/20-body \" + '\n');
+                        sw.Write(@"--phantom-path=" + this.PhantomName + @" \" + '\n');
+                        sw.Write(@"--tally-path=" + OneOutputFileName.TallyFilePath + @" \" + '\n');
+                        sw.Write(@"--universe-to-material-path=" + OneOutputFileName.universe_to_materialFilePath + @" \" + '\n');
+                        sw.Write(@"--material-path=" + OneOutputFileName.MaterialFilePath + @" \" + '\n');
+                        sw.Write(@"--compact-dose-print-in-csv \" + '\n');
+                        sw.Write(@"--phantom-translation-x=" + -RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX / 2 + @" \" + '\n');
+                        sw.Write(@"--phantom-translation-y=" + -RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY / 2 + @" \" + '\n');
+                        sw.Write(@"--phantom-translation-z=0 \" + '\n');
+                        int circleNum = 0;
+                        if (OneUsercodeProperties.ct_scanner_motion_type.Trim() == "axial") // 层扫
+                        {
+                            circleNum = (int) (Math.Floor((RepeatStructureInAPhantom.DimZ *
+                                                           RepeatStructureInAPhantom.ResolutionZ /
+                                                           (double) OneRunshParameters
+                                                               .ct_scanner_z_translation_delta)) + 1);
                         }
                         else
                         {
-                            sw.Write(item.CellIndex.ToString("d").PadRight(5) + item.MaterialIndex.ToString("d").PadRight(5) + item.DensityValue.ToString("f6").PadRight(10) +
-                                     item.SurfaceComposation.ToString("d").PadRight(5) +
-                                     "u = " + item.UniverseIndex.ToString("d").PadRight(5) +
-                                     "vol = " + (item.NumSum * RepeatStructureInAPhantom.ResolutionX * RepeatStructureInAPhantom.ResolutionY * RepeatStructureInAPhantom.ResolutionZ).ToString("f4").PadRight(13) +
-                                     "$ n = " + item.NumSum.ToString("d").PadRight(13) + item.OrganName + Environment.NewLine);
+                            circleNum = (int) (Math.Floor((RepeatStructureInAPhantom.DimZ *
+                                                           RepeatStructureInAPhantom.ResolutionZ /
+                                                           ((double) OneRunshParameters
+                                                               .ct_scanner_z_translation_delta * OneUsercodeProperties
+                                                               .ct_scanner_custom_num_projection)) + 1));
+                        }
+                            
+                        int scanSourceNumber = circleNum * OneUsercodeProperties.ct_scanner_custom_num_projection;
+                        sw.Write(@"--ct-scanner-num-total-projection=" + scanSourceNumber + @" \" + '\n');
+                        sw.Write(@"--ct-scanner-z-translation-delta=" + OneRunshParameters.ct_scanner_z_translation_delta + @" \" + '\n');
+                        sw.Write(@"--num-thread-cpu=" + OneRunshParameters.num_thread_cpu + @" \" + '\n');
+
+                        if (OneRunshParameters.ShouldOutputGPUScript) // 如果需要导出GPU运行脚本的话
+                        {
+                            sw.Write('\n');
+                            sw.Write(@"# run gpu program" + '\n');
+                            sw.Write(@"${BIN} \" + '\n');
+                            sw.Write(@"--user-code-path=" + OneOutputFileName.UsercodeFilePath + @" \" + '\n');
+                            sw.Write(@"--xs-dir=${DATA} \" + '\n');
+                            sw.Write(@"--result-path=output_gpu/result_tally.csv \" + '\n');
+                            sw.Write(@"--rsd-path=output_gpu/result_rsd.csv \" + '\n');
+                            sw.Write(@"--logbook-path=output_gpu/logbook.txt \" + '\n');
+                            sw.Write(@"--source-spectrum-path=${DATA}/application/ct/kVp/" + OneRunshParameters.Spectrum + @" \" + '\n');
+                            //sw.Write(@"--source-spectrum-path=${DATA}/application/ct/kVp/120 \" + '\n');
+                            sw.Write(@"--ct-scanner-path=${DATA}/application/ct/ct_scanner/ge_lightspeed_pro_16/" + OneRunshParameters.Scanner + @" \" + '\n');
+                            //sw.Write(@"--ct-scanner-path=${DATA}/application/ct/ct_scanner/ge_lightspeed_pro_16/20-body \" + '\n');
+                            sw.Write(@"--phantom-path=" + this.PhantomName + @" \" + '\n');
+                            sw.Write(@"--tally-path=" + OneOutputFileName.TallyFilePath + @" \" + '\n');
+                            sw.Write(@"--universe-to-material-path=" + OneOutputFileName.universe_to_materialFilePath + @" \" + '\n');
+                            sw.Write(@"--material-path=" + OneOutputFileName.MaterialFilePath + @" \" + '\n');
+                            sw.Write(@"--compact-dose-print-in-csv \" + '\n');
+                            sw.Write(@"--phantom-translation-x=" + -RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX / 2 + @" \" + '\n');
+                            sw.Write(@"--phantom-translation-y=" + -RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY / 2 + @" \" + '\n');
+                            sw.Write(@"--phantom-translation-z=0 \" + '\n');
+                            sw.Write(@"--ct-scanner-num-total-projection=" + scanSourceNumber + @" \" + '\n');
+                            sw.Write(@"--ct-scanner-z-translation-delta=" + OneRunshParameters.ct_scanner_z_translation_delta + @" \" + '\n');
+                            sw.Write(@"--gpu-to-use=" + OneRunshParameters.gpu_to_use + @" \" + '\n');
                         }
                     }
-
-                    sw.Flush();
-                    sw.Close();
                 }
             }
         }
@@ -1009,6 +1243,110 @@ namespace MCNPFileEditor.DataClassAndControl
             get
             {
                 return ResolutionZ_;
+            }
+        }
+
+        // X Y Z Voxel填充使用的RPP的X Y Z范围
+        // X 下界
+        float VoxelLowerBoundX_;
+        public float VoxelLowerBoundX
+        {
+            set
+            {
+                VoxelLowerBoundX_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelLowerBoundX_"));
+                }
+            }
+            get
+            {
+                return VoxelLowerBoundX_;
+            }
+        }
+        // X 上界
+        float VoxelUpperBoundX_;
+        public float VoxelUpperBoundX
+        {
+            set
+            {
+                VoxelUpperBoundX_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelUpperBoundX_"));
+                }
+            }
+            get
+            {
+                return VoxelUpperBoundX_;
+            }
+        }
+        // Y 下界
+        float VoxelLowerBoundY_;
+        public float VoxelLowerBoundY
+        {
+            set
+            {
+                VoxelLowerBoundY_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelLowerBoundY_"));
+                }
+            }
+            get
+            {
+                return VoxelLowerBoundY_;
+            }
+        }
+        // Y 上界
+        float VoxelUpperBoundY_;
+        public float VoxelUpperBoundY
+        {
+            set
+            {
+                VoxelUpperBoundY_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelUpperBoundY_"));
+                }
+            }
+            get
+            {
+                return VoxelUpperBoundY_;
+            }
+        }
+        // Z 下界
+        float VoxelLowerBoundZ_;
+        public float VoxelLowerBoundZ
+        {
+            set
+            {
+                VoxelLowerBoundZ_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelLowerBoundZ_"));
+                }
+            }
+            get
+            {
+                return VoxelLowerBoundZ_;
+            }
+        }
+        // Z 上界
+        float VoxelUpperBoundZ_;
+        public float VoxelUpperBoundZ
+        {
+            set
+            {
+                VoxelUpperBoundZ_ = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs("VoxelUpperBoundZ_"));
+                }
+            }
+            get
+            {
+                return VoxelUpperBoundZ_;
             }
         }
 

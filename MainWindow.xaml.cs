@@ -72,7 +72,7 @@ namespace MCNPFileEditor
                 mode = "complicate";
             }
 
-            if (OrgannameFile.Content != null || !((string)OrgannameFile.Content).Equals(""))
+            if (OrgannameFile.Text != null || !((string)OrgannameFile.Text).Equals(""))
             {
                 // OrganNameFile = (string) OrgannameFile.Content;
 
@@ -149,7 +149,7 @@ namespace MCNPFileEditor
                 mode = "complicate";
             }
 
-            if (OrgannameFile.Content != null || !((string)OrgannameFile.Content).Equals(""))
+            if (OrgannameFile.Text != null || !((string)OrgannameFile.Text).Equals(""))
             {
                 // OrganNameFile = (string)OrgannameFile.Content;
 
@@ -227,7 +227,7 @@ namespace MCNPFileEditor
                 {
                     OrganNameFile = ofd.FileName;
                     
-                    OrgannameFile.Content = System.IO.Path.GetFileName(OrganNameFile);
+                    OrgannameFile.Text = System.IO.Path.GetFileName(OrganNameFile);
                 }
                 else
                 {

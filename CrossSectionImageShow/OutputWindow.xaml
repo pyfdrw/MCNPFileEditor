@@ -1,0 +1,146 @@
+﻿<Window x:Class="MCNPFileEditor.CrossSectionImageShow.OutputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MCNPFileEditor.CrossSectionImageShow"
+        Background="{DynamicResource MaterialDesignPaper}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+        mc:Ignorable="d"
+        Title="OutputWindow" Height="800" Width="800">
+    <Grid ShowGridLines="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*"/>
+            <RowDefinition Height="100*"/>
+            <RowDefinition Height="8*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="5">
+            <Button Margin="5" Click="OutputMcClick">Output MCNP format</Button>
+            <Button Margin="5" Click="OutputArcherClick">Output Arhcer format</Button>
+            <Button Margin="5" Click="CancelClick">Cancel</Button>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
+                <Label>导出所有体模</Label>
+                <CheckBox x:Name="OutputWayCheckBox"></CheckBox>
+                <StackPanel.ToolTip>
+                    <ToolTip>
+                        <Label>选中则导出所有的体模，否则只导出当前显示的体模</Label>
+                    </ToolTip>
+                </StackPanel.ToolTip>
+            </StackPanel>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="100*"/>
+            </Grid.RowDefinitions>
+            <Label HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold" Margin="5">
+                只对以Archer格式输出有效，MCNP格式输出忽视此项设置
+            </Label>
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.ColumnSpan="2" Grid.Row="0" Margin="5">
+                    <dragablz:TabablzControl>
+                        <TabItem Header="usercode" x:Name="UserCodeTabItem">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                                        <ColumnDefinition Width="1.5*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="5" CanVerticallyScroll="True">
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-scanner-initial-rotation-angle-in-degree</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-scanner-rotation-angle-delta-in-degree</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-scanner-z-initial-translation</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-scanner-motion-type</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-dose-print-granularity</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">ct-scanner-custom-num-projection</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">universe-ct-scanner</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">num-history</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">cylinder-bound-radius</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">cylinder-bound-z-upper</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">cylinder-bound-z-lower</Label>
+                                        <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">universe-air</Label>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="5">
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_initial_rotation_angle_in_degree}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_rotation_angle_delta_in_degree}" IsEnabled="False"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_z_initial_translation}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_motion_type}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_dose_print_granularity}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_custom_num_projection}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=universe_ct_scanner}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=num_history}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=cylinder_bound_radius}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=cylinder_bound_z_upper}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=cylinder_bound_z_lower}"></TextBox>
+                                        <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=universe_air}"></TextBox>
+                                    </StackPanel>
+                                </Grid>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="run.sh" x:Name="runshTabItem">
+                            <Grid Margin="5">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                    <Grid Margin="5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                                            <ColumnDefinition Width="1.5*"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="5" CanVerticallyScroll="True">
+                                            <!--<Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">//-ct-scanner-z-translation-delta</Label> -->
+                                            <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">spectrum</Label>
+                                            <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">scanner</Label>
+                                            <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">--num-thread-cpu</Label>
+                                            <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">--gpu-to-use</Label>
+                                            <Label MinHeight="35" HorizontalContentAlignment="Right" Margin="0,0,5,0">尝试输出GPU运行脚本</Label>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="5">
+                                            <!--<TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=ct_scanner_z_translation_delta}" HorizontalAlignment="Stretch"></TextBox>-->
+                                            <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" HorizontalAlignment="Stretch" x:Name="SpectrumTextBox">80, 100, 120, 140</TextBox>
+                                            <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" HorizontalAlignment="Stretch" x:Name="ScannerTextBox">10-head, 20-body, 20-head, 1.25-head, 5-body, 5-head, 10-body</TextBox>
+                                            <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=num_thread_cpu}" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" Text="{Binding Path=gpu_to_use}" HorizontalAlignment="Stretch"></TextBox>
+                                            <CheckBox MinHeight="35" HorizontalContentAlignment="Left" Margin="5,0,0,0" IsChecked="{Binding Path=ShouldOutputGPUScript}" HorizontalAlignment="Stretch"></CheckBox>
+                                        </StackPanel>
+                                    </Grid>
+                                </ScrollViewer>
+                            </Grid>
+                        </TabItem>
+                    </dragablz:TabablzControl>
+                </Grid>
+                <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,5,0,5">
+                    <Label HorizontalAlignment="Right" Margin="0,0,5,0">输出Material文件名</Label>
+                    <Label HorizontalAlignment="Right" Margin="0,0,5,0">输出Tally文件名</Label>
+                    <Label HorizontalAlignment="Right" Margin="0,0,5,0">输出universe_to_material文件名</Label>
+                    <Label HorizontalAlignment="Right" Margin="0,0,5,0">输出usercode文件名</Label>
+                    <Label HorizontalAlignment="Right" Margin="0,0,5,0">输出run.sh文件名</Label>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="1" Margin="0,5,0,5" x:Name="PathStackPanel">
+                    <TextBox  HorizontalAlignment="Left" Margin="5,0,0,0" Text="{Binding MaterialFilePath}"></TextBox>
+                    <TextBox  HorizontalAlignment="Left" Margin="5,0,0,0" Text="{Binding TallyFilePath}"></TextBox>
+                    <TextBox  HorizontalAlignment="Left" Margin="5,0,0,0" Text="{Binding universe_to_materialFilePath}"></TextBox>
+                    <TextBox  HorizontalAlignment="Left" Margin="5,0,0,0" Text="{Binding UsercodeFilePath}"></TextBox>
+                    <TextBox  HorizontalAlignment="Left" Margin="5,0,0,0" Text="{Binding RunshFilePath}"></TextBox>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="2" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="20*"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" x:Name="TaskProgressBar" IsIndeterminate="True" MinWidth="30" MinHeight="30"></ProgressBar>
+            <Label x:Name="ProgressLabel" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center">Begin</Label>
+        </Grid>
+    </Grid>
+
+</Window>

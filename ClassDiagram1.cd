@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="MCNPFileEditor.DataClassAndControl.PhantomsCollection" BaseTypeListCollapsed="true">
+    <Position X="4.75" Y="4" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAAAAAAAAAggAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.Phantom" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="4.75" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Events" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AACAQBAFAQAAQABEAAAAAIAAgAAACIAAAAFAAAABABA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.RepeatStructure" BaseTypeListCollapsed="true">
+    <Position X="12.5" Y="1.5" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Events" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>QAAAAEALIQQAYAAEAQABIAAAgAAAAAEAAACwAAIAgAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.CellsCollection" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="1.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAEAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.Cell" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="1.5" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Events" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAgIAAABAAkAAAAAgwQIAICACAAAEAAAgAEA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.SketchCollInASlice">
+    <Position X="4" Y="1.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MCNPFileEditor.DataClassAndControl.SketchInfo">
+    <Position X="0.5" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAQAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="MCNPFileEditor.DataClassAndControl.MaskType">
+    <Position X="0.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAICAAAAAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>DataClassAndControl\PhantomsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

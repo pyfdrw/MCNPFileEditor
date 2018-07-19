@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCNPFileEditor.CrossSectionImageShow"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
+        xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+        Background="{DynamicResource MaterialDesignPaper}"
         xmlns:prop="clr-namespace:MCNPFileEditor.Properties"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="CrossSectionMainWindow" Height="768" Width="1365">
     <Window.Resources>
@@ -16,7 +19,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="8*"/>
+            <RowDefinition Height="6*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -26,7 +29,7 @@
                 <ColumnDefinition Width="8*"/>
             </Grid.ColumnDefinitions>
             <GroupBox Header="体模列表" Margin="5">
-                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinHeight="30" MinWidth="200" x:Name="PhantomCollectionComboBox" SelectionChanged="PhantomCollectionComboBox_SelectionChanged">
+                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinHeight="30" MinWidth="200" x:Name="PhantomCollectionComboBox" SelectionChanged="PhantomCollectionComboBox_SelectionChanged"  materialDesign:HintAssist.Hint="Select a phantom" Style="{StaticResource MaterialDesignFloatingHintComboBox}">
                 </ComboBox>
             </GroupBox>
 
@@ -44,11 +47,11 @@
                 </StackPanel>
             </GroupBox>
 
-            <TabControl x:Name="tabControl" Grid.Column="2">
+            <dragablz:TabablzControl x:Name="tabControl" Grid.Column="2" FixedHeaderCount="5">
                 <TabItem Header="勾画工具">
                     <Grid Background="#FFE5E5E5">
                         <StackPanel Orientation="Horizontal">
-                            <ComboBox x:Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Center" MinHeight="20" MinWidth="200" SelectionChanged="comboBox_SelectionChanged" >
+                            <ComboBox x:Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Center" MinHeight="20" MinWidth="200" SelectionChanged="comboBox_SelectionChanged" materialDesign:HintAssist.Hint="Select a tool" Style="{StaticResource MaterialDesignFloatingHintComboBox}">
                                 <ComboBox.Items>
                                     <ComboBoxItem>点</ComboBoxItem>
                                     <ComboBoxItem>矩形</ComboBoxItem>
@@ -95,7 +98,14 @@
                         </WrapPanel>
                     </Grid>
                 </TabItem>
-            </TabControl>
+                <TabItem Header="配准工具">
+                    <Grid Background="#FFE5E5E5">
+                        <WrapPanel>
+                            <Button Margin="5" Click="outputPhantomToBin_buttomClick">输出体模到二进制文件</Button>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem>
+            </dragablz:TabablzControl>
         </Grid>
 
         <Border Grid.Row="1" BorderThickness="2" BorderBrush="Black">
