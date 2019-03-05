@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
 
         public void RefreshInfo()
         {
+            // 获取绑定的表达式进行更新
             BindingExpression newBE1 = BindingOperations.GetBindingExpression(CrossSectionTypeLabel, Label.ContentProperty);
             if (newBE1 != null)
             {
@@ -73,6 +75,37 @@ namespace MCNPFileEditor.CrossSectionImageShow
             {
                 newBE8.UpdateTarget();
             }
+        }
+    }
+
+    public class FloatvalueConvertWithFixed2 : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+            else
+            {
+                try
+                {
+                    double mouseLocation = (double)value;
+                    return mouseLocation.ToString("F2");
+                }
+                catch (Exception e)
+                {
+                    return DependencyProperty.UnsetValue;
+                }
+            }
+            //throw new NotImplementedException();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // 反向转换不作处理
+            return DependencyProperty.UnsetValue;
+            //throw new NotImplementedException();
         }
     }
 }

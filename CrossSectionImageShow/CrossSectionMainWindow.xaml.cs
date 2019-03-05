@@ -2876,6 +2876,13 @@ namespace MCNPFileEditor.CrossSectionImageShow
 
             MessageBox.Show("Finished!");
         }
+
+        // 更改器官编号，控制窗口弹出
+        private void organIndexReplace_buttomClick(object sender, RoutedEventArgs e)
+        {
+            OrganIdChange organIdChangeWindow = new OrganIdChange(phantomsCollection);
+            organIdChangeWindow.ShowDialog();
+        }
     }
 
     public class CrossSection : INotifyPropertyChanged

@@ -8,40 +8,41 @@
         Title="鼠标位置器官信息" Height="297" Width="219">
     <Window.Resources>
         <local:ColorToSolidBrushConvert x:Key="ctsb"/>
+        <local:FloatvalueConvertWithFixed2 x:Key="ConvertWithFixed2"></local:FloatvalueConvertWithFixed2>
     </Window.Resources>
     <Grid Margin="10">
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>截面类型:</Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">截面类型:</Label>
                 <Label Content="{Binding CrossSectionType}" x:Name="CrossSectionTypeLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>器官编号: </Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">器官编号: </Label>
                 <Label Content="{Binding OrganIndex, UpdateSourceTrigger=PropertyChanged}" x:Name="OrganIndexLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>材料编号:</Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">材料编号:</Label>
                 <Label Content="{Binding MaterialIndex, UpdateSourceTrigger=PropertyChanged}" x:Name="MaterialIndexLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>材料密度:</Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">材料密度:</Label>
                 <Label Content="{Binding MaterialDensity}" x:Name="MaterialDensityLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>器官名称:</Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">器官名称:</Label>
                 <Label Content="{Binding OrganName}" x:Name="OrganNameLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>颜色表示:</Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">颜色表示:</Label>
                 <Label MinWidth="80" MinHeight="25" Background="{Binding OrganColor, Converter={StaticResource ctsb}}" x:Name="OrganColorLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>鼠标坐标X:</Label>
-                <Label Content="{Binding Path=MouseLocationX}" x:Name="MouseLocationXLabel"></Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">鼠标像素(横向):</Label>
+                <Label Content="{Binding Path=MouseLocationX, Mode=OneWay, Converter={StaticResource ConvertWithFixed2}}" x:Name="MouseLocationXLabel"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>鼠标坐标Y:</Label>
-                <Label Content="{Binding Path=MouseLocationY}" x:Name="MouseLocationYLabel"></Label>
+                <Label MinWidth="100" HorizontalContentAlignment="Right">鼠标像素(纵向):</Label>
+                <Label Content="{Binding Path=MouseLocationY, Mode=OneWay, Converter={StaticResource ConvertWithFixed2}}" x:Name="MouseLocationYLabel"></Label>
             </StackPanel>
         </StackPanel>
     </Grid>

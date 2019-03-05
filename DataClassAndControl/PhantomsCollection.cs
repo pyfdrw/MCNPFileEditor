@@ -430,6 +430,47 @@ namespace MCNPFileEditor.DataClassAndControl
             }
         }
 
+        // 使用一个字典索引，更改器官的ID
+        // 字典项的KEY是原来的器官ID，Value是新的器官ID
+        // 需要注意，要遍历每个Voxel和Cell进行替换，不能遍历字典进行替换，以免出现重复替换
+        public void ReplaceOrganIDs(Dictionary<int, int> refRepIdList)
+        {
+            // 首先进行Cell的处理
+            for (int i = 0; i < CellsCollectionInAPhantom.AllCells.Length; i++)
+            {
+                if (CellsCollectionInAPhantom.AllCells[i] == null)
+                    continue;
+                // 找到需要替换的记录，进行处理
+                if (refRepIdList.ContainsKey(CellsCollectionInAPhantom.AllCells[i].CellIndex))
+                {
+                    // CellIndex UnierseIndex 都需要进行更改
+                    CellsCollectionInAPhantom.AllCells[i].CellIndex = 
+                        refRepIdList[CellsCollectionInAPhantom.AllCells[i].CellIndex];
+                    CellsCollectionInAPhantom.AllCells[i].UniverseIndex =
+                        CellsCollectionInAPhantom.AllCells[i].CellIndex;
+                }
+            }
+
+            // 进行重复结构的处理
+            for (int i = 0; i < RepeatStructureInAPhantom.DimX; i++)
+            {
+                for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                {
+                    for (int k = 0; k < RepeatStructureInAPhantom.DimZ; k++)
+                    {
+                        // 找到相应的记录，进行处理
+                        if(refRepIdList.ContainsKey(RepeatStructureInAPhantom.RepeatMatrix[k, j, i])) // short -> int
+                        {
+                            RepeatStructureInAPhantom.RepeatMatrix[k, j, i] =
+                                (short)refRepIdList[RepeatStructureInAPhantom.RepeatMatrix[k, j, i]];
+                        }
+                    }
+                }
+            }
+
+            // 处理完成
+        }
+
         public void ClearSketchCollForAll()
         {
             if (SketchCollForAllTransverse != null)
@@ -674,20 +715,20 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.Write("C ******************************************************************************" + Environment.NewLine);
                     sw.Write("1    rpp ");
                     // 0.ToString("f2").PadRight(6, ' ') +
-                    sw.Write(RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') +
-                             RepeatStructureInAPhantom.VoxelUpperBoundX.ToString("f3").PadRight(6, ' ') +
-                             RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') +
-                             RepeatStructureInAPhantom.VoxelUpperBoundY.ToString("f3").PadRight(6, ' ') +
-                             RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') +
+                    sw.Write(RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " + 
+                             RepeatStructureInAPhantom.VoxelUpperBoundX.ToString("f3").PadRight(6, ' ') + " " + 
+                             RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + " " + 
+                             RepeatStructureInAPhantom.VoxelUpperBoundY.ToString("f3").PadRight(6, ' ') + " " + 
+                             RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') + " " +
                              RepeatStructureInAPhantom.VoxelUpperBoundZ.ToString("f3").PadRight(6, ' '));
                     sw.Write("  $ Voxel size" + Environment.NewLine);
                     sw.Write("2    rpp ");
                     sw.Write(
-                        RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + 
+                        RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " + 
                         (RepeatStructureInAPhantom.VoxelLowerBoundX + RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX).ToString("f2").PadRight(6, ' ') +
-                        RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + 
+                        RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + " " +
                         (RepeatStructureInAPhantom.VoxelLowerBoundY + RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY).ToString("f2").PadRight(6, ' ') +
-                        RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') + 
+                        RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') + " " +
                         (RepeatStructureInAPhantom.VoxelLowerBoundZ + RepeatStructureInAPhantom.DimZ * RepeatStructureInAPhantom.ResolutionZ).ToString("f2").PadRight(6, ' '));
                     sw.Write("  $ Box" + Environment.NewLine);
                     sw.Write("3    pz  -1e2    $ XY plane used in universe definition");
@@ -1413,6 +1454,7 @@ namespace MCNPFileEditor.DataClassAndControl
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Cell[] AllCells;
+
     }
 
     /// <summary>
