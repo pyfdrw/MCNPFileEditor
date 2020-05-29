@@ -2663,7 +2663,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
         int additionOrgan = 119; // 补充空位的器官
         bool shouldForceReplace = true;
         // 器官平移选择
-        private void Button_Click_4(object sender, RoutedEventArgs e)
+        private void DoShift_Button_Click(object sender, RoutedEventArgs e)
         {
             InputTobeMoveOrgans newInputTobeMoveOrgans = new InputTobeMoveOrgans();
             newInputTobeMoveOrgans.OrgansTobeMove = OrgansTobeMove;
@@ -2882,6 +2882,37 @@ namespace MCNPFileEditor.CrossSectionImageShow
         {
             OrganIdChange organIdChangeWindow = new OrganIdChange(phantomsCollection);
             organIdChangeWindow.ShowDialog();
+        }
+
+        // 体模的反转，只是操作体模的像素矩阵进行变换，不改变其他坐标系
+        private void Do_Flip_ButtomClick(object sender, RoutedEventArgs e)
+        {
+            // 改变重复结构
+            if (selectedPhantom?.RepeatStructureInAPhantom?.RepeatMatrix != null)
+            {
+                FlipSelectWindow flipSelectWindow = new FlipSelectWindow();
+                flipSelectWindow.ShowDialog();
+                switch (flipSelectWindow.TheSelectedAxis)
+                {
+                    case FlipSelectWindow.SelectedAxis.X:
+                        selectedPhantom.FlipMatrix("X");
+                        MessageBox.Show("翻转X成功");
+                        break;
+                    case FlipSelectWindow.SelectedAxis.Y:
+                        selectedPhantom.FlipMatrix("Y");
+                        MessageBox.Show("翻转Y成功");
+                        break;
+                    case FlipSelectWindow.SelectedAxis.Z:
+                        selectedPhantom.FlipMatrix("Z");
+                        MessageBox.Show("翻转Z成功");
+                        break;
+                    case FlipSelectWindow.SelectedAxis.Cancel:
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
     }
 

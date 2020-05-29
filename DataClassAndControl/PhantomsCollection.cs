@@ -367,7 +367,7 @@ namespace MCNPFileEditor.DataClassAndControl
                             RepeatStructureInAPhantom.VoxelUpperBoundY = (float)Convert.ToDouble(allElement[5]);
                             RepeatStructureInAPhantom.VoxelLowerBoundZ = (float)Convert.ToDouble(allElement[6]);
                             RepeatStructureInAPhantom.VoxelUpperBoundZ = (float)Convert.ToDouble(allElement[7]);
-                            
+
                             RepeatStructureInAPhantom.ResolutionX = Math.Abs(
                                 RepeatStructureInAPhantom.VoxelUpperBoundX - RepeatStructureInAPhantom.VoxelLowerBoundX);
                             RepeatStructureInAPhantom.ResolutionY = Math.Abs(
@@ -444,7 +444,7 @@ namespace MCNPFileEditor.DataClassAndControl
                 if (refRepIdList.ContainsKey(CellsCollectionInAPhantom.AllCells[i].CellIndex))
                 {
                     // CellIndex UnierseIndex 都需要进行更改
-                    CellsCollectionInAPhantom.AllCells[i].CellIndex = 
+                    CellsCollectionInAPhantom.AllCells[i].CellIndex =
                         refRepIdList[CellsCollectionInAPhantom.AllCells[i].CellIndex];
                     CellsCollectionInAPhantom.AllCells[i].UniverseIndex =
                         CellsCollectionInAPhantom.AllCells[i].CellIndex;
@@ -459,7 +459,7 @@ namespace MCNPFileEditor.DataClassAndControl
                     for (int k = 0; k < RepeatStructureInAPhantom.DimZ; k++)
                     {
                         // 找到相应的记录，进行处理
-                        if(refRepIdList.ContainsKey(RepeatStructureInAPhantom.RepeatMatrix[k, j, i])) // short -> int
+                        if (refRepIdList.ContainsKey(RepeatStructureInAPhantom.RepeatMatrix[k, j, i])) // short -> int
                         {
                             RepeatStructureInAPhantom.RepeatMatrix[k, j, i] =
                                 (short)refRepIdList[RepeatStructureInAPhantom.RepeatMatrix[k, j, i]];
@@ -506,7 +506,7 @@ namespace MCNPFileEditor.DataClassAndControl
                 }
             }
         }
-        
+
         public void MoveOrgan(List<int> OrgansTobeMove, string organsMoveDirection, int organsMoceDis, int additionOrgan, bool shouldForceReplace)
         {
             if (OrgansTobeMove == null || (organsMoveDirection != "X" && organsMoveDirection != "Y" && organsMoveDirection != "Z"))
@@ -715,16 +715,16 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.Write("C ******************************************************************************" + Environment.NewLine);
                     sw.Write("1    rpp ");
                     // 0.ToString("f2").PadRight(6, ' ') +
-                    sw.Write(RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " + 
-                             RepeatStructureInAPhantom.VoxelUpperBoundX.ToString("f3").PadRight(6, ' ') + " " + 
-                             RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + " " + 
-                             RepeatStructureInAPhantom.VoxelUpperBoundY.ToString("f3").PadRight(6, ' ') + " " + 
+                    sw.Write(RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " +
+                             RepeatStructureInAPhantom.VoxelUpperBoundX.ToString("f3").PadRight(6, ' ') + " " +
+                             RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + " " +
+                             RepeatStructureInAPhantom.VoxelUpperBoundY.ToString("f3").PadRight(6, ' ') + " " +
                              RepeatStructureInAPhantom.VoxelLowerBoundZ.ToString("f3").PadRight(6, ' ') + " " +
                              RepeatStructureInAPhantom.VoxelUpperBoundZ.ToString("f3").PadRight(6, ' '));
                     sw.Write("  $ Voxel size" + Environment.NewLine);
                     sw.Write("2    rpp ");
                     sw.Write(
-                        RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " + 
+                        RepeatStructureInAPhantom.VoxelLowerBoundX.ToString("f3").PadRight(6, ' ') + " " +
                         (RepeatStructureInAPhantom.VoxelLowerBoundX + RepeatStructureInAPhantom.DimX * RepeatStructureInAPhantom.ResolutionX).ToString("f2").PadRight(6, ' ') +
                         RepeatStructureInAPhantom.VoxelLowerBoundY.ToString("f3").PadRight(6, ' ') + " " +
                         (RepeatStructureInAPhantom.VoxelLowerBoundY + RepeatStructureInAPhantom.DimY * RepeatStructureInAPhantom.ResolutionY).ToString("f2").PadRight(6, ' ') +
@@ -734,6 +734,66 @@ namespace MCNPFileEditor.DataClassAndControl
                     sw.Write("3    pz  -1e2    $ XY plane used in universe definition");
                     sw.Flush();
                     sw.Close();
+                }
+            }
+        }
+
+        // 翻转体模的X,Y或者Z矩阵
+        // flipIndex = "X" "Y" or "Z"
+        public void FlipMatrix(string flipIndex = "")
+        {
+            if (RepeatStructureInAPhantom?.RepeatMatrix != null)
+            {
+                short temp = 0;
+                if (flipIndex.ToLower() == "x")
+                {
+                    for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                    {
+                        for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                        {
+                            for (int k = 0; k < RepeatStructureInAPhantom.DimX / 2; k++)
+                            {
+                                temp = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] =
+                                    RepeatStructureInAPhantom.RepeatMatrix[i, j,
+                                        RepeatStructureInAPhantom.DimX - k - 1];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j,
+                                    RepeatStructureInAPhantom.DimX - k - 1] = temp;
+                            }
+                        }
+                    }
+                }
+                else if (flipIndex.ToLower() == "y")
+                {
+                    for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
+                    {
+                        for (int j = 0; j < RepeatStructureInAPhantom.DimY / 2; j++)
+                        {
+                            for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                            {
+                                temp = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] =
+                                    RepeatStructureInAPhantom.RepeatMatrix[i, RepeatStructureInAPhantom.DimY - 1 - j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, RepeatStructureInAPhantom.DimY - 1 - j, k] = temp;
+                            }
+                        }
+                    }
+                }
+                else if (flipIndex.ToLower() == "z")
+                {
+                    for (int i = 0; i < RepeatStructureInAPhantom.DimZ / 2; i++)
+                    {
+                        for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
+                        {
+                            for (int k = 0; k < RepeatStructureInAPhantom.DimX; k++)
+                            {
+                                temp = RepeatStructureInAPhantom.RepeatMatrix[i, j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[i, j, k] =
+                                    RepeatStructureInAPhantom.RepeatMatrix[RepeatStructureInAPhantom.DimZ - 1 - i, j, k];
+                                RepeatStructureInAPhantom.RepeatMatrix[RepeatStructureInAPhantom.DimZ - 1 - i, j, k] = temp;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -751,7 +811,7 @@ namespace MCNPFileEditor.DataClassAndControl
                 using (var fs = new FileStream(outputfilePath, FileMode.Create))
                 {
                     StreamWriter sw = new StreamWriter(fs);
-                    
+
                     sw.Write("num-voxel-x    " + " = " + RepeatStructureInAPhantom.DimX.ToString().PadLeft(7) + '\n');
                     sw.Write("num-voxel-y    " + " = " + RepeatStructureInAPhantom.DimY.ToString().PadLeft(7) + '\n');
                     sw.Write("num-voxel-z    " + " = " + RepeatStructureInAPhantom.DimZ.ToString().PadLeft(7) + '\n');
@@ -811,7 +871,7 @@ namespace MCNPFileEditor.DataClassAndControl
                         sw.Write(newline + '\n');
                         newline = "";
                     }
-                    
+
                     sw.Flush();
                     sw.Close();
                 }
@@ -883,7 +943,7 @@ namespace MCNPFileEditor.DataClassAndControl
                             }
                         }
                         sw.Write("organ-dose-end" + "\n\n");
-                        
+
                         //F4 tally cards
                         sw.Write(OutputInneedParameter.F4TallyCards + '\n');
                     }
@@ -1009,20 +1069,20 @@ namespace MCNPFileEditor.DataClassAndControl
                         int circleNum = 0;
                         if (OneUsercodeProperties.ct_scanner_motion_type.Trim() == "axial") // 层扫
                         {
-                            circleNum = (int) (Math.Floor((RepeatStructureInAPhantom.DimZ *
+                            circleNum = (int)(Math.Floor((RepeatStructureInAPhantom.DimZ *
                                                            RepeatStructureInAPhantom.ResolutionZ /
-                                                           (double) OneRunshParameters
+                                                           (double)OneRunshParameters
                                                                .ct_scanner_z_translation_delta)) + 1);
                         }
                         else
                         {
-                            circleNum = (int) (Math.Floor((RepeatStructureInAPhantom.DimZ *
+                            circleNum = (int)(Math.Floor((RepeatStructureInAPhantom.DimZ *
                                                            RepeatStructureInAPhantom.ResolutionZ /
-                                                           ((double) OneRunshParameters
+                                                           ((double)OneRunshParameters
                                                                .ct_scanner_z_translation_delta * OneUsercodeProperties
                                                                .ct_scanner_custom_num_projection)) + 1));
                         }
-                            
+
                         int scanSourceNumber = circleNum * OneUsercodeProperties.ct_scanner_custom_num_projection;
                         sw.Write(@"--ct-scanner-num-total-projection=" + scanSourceNumber + @" \" + '\n');
                         sw.Write(@"--ct-scanner-z-translation-delta=" + OneRunshParameters.ct_scanner_z_translation_delta + @" \" + '\n');

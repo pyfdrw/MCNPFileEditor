@@ -89,10 +89,11 @@
                         
                     </Grid>
                 </TabItem>
-                <TabItem Header="平移工具">
+                <TabItem Header="平移旋转工具">
                     <Grid Background="#FFE5E5E5">
                         <WrapPanel>
-                            <Button Margin="5" Click="Button_Click_4">执行平移</Button>
+                            <Button Margin="5" Click="DoShift_Button_Click">执行平移</Button>
+                            <Button Margin="5" Click="Do_Flip_ButtomClick">执行翻转</Button>
                         </WrapPanel>
                     </Grid>
                 </TabItem>
