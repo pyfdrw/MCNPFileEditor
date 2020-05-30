@@ -80,7 +80,7 @@
                     <Grid Background="#FFE5E5E5">
                         <StackPanel>
                             <WrapPanel>
-                                <Button Margin="5" Click="Button_Click_2">执行替换</Button>
+                                <Button Margin="5" Click="DoVoxel_Button_Click">执行替换</Button>
                                 <Button Margin="5" HorizontalAlignment="Left" Click="organIndexReplace_buttomClick">执行器官编号替换</Button>
                                 <ProgressBar MinWidth="300" MaxHeight="10" x:Name="ReplaceProgressBar" Visibility="Hidden"></ProgressBar>
                             </WrapPanel>

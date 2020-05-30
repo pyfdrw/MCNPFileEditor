@@ -1753,6 +1753,41 @@ namespace MCNPFileEditor.DataClassAndControl
             cellIndex = indexcell;
             maskType = MaskType.PolygonType;
         }
+
+        // 合并两个轮廓
+        public SketchInfo CombineTwoSketchInfos(SketchInfo SketchInfoA, SketchInfo SketchInfoB)
+        {
+            if (SketchInfoA?.vertexColl == null || SketchInfoA.vertexColl.Count == 0)
+                return SketchInfoB;
+            if (SketchInfoB?.vertexColl == null || SketchInfoB.vertexColl.Count == 0)
+                return SketchInfoA;
+
+            if(SketchInfoA.cellIndex != SketchInfoB.cellIndex)
+                throw new Exception("合并的两个轮廓的索引值不相同");
+
+            SketchInfo conbinedSketchInfo = new SketchInfo(SketchInfoA.cellIndex);
+            conbinedSketchInfo.maskType = MaskType.PointType;
+
+            conbinedSketchInfo.vertexColl = new List<Point>();
+            // 合并点
+            foreach (Point point in SketchInfoA.vertexColl)
+            {
+                conbinedSketchInfo.vertexColl.Add(point);
+            }
+            conbinedSketchInfo.vertexColl.Add(SketchInfoA.vertexColl[0]);
+
+            foreach (Point point in SketchInfoB.vertexColl)
+            {
+                conbinedSketchInfo.vertexColl.Add(point);
+            }
+            conbinedSketchInfo.vertexColl.Add(SketchInfoB.vertexColl[0]);
+
+            // 在加上最开始一个点
+            conbinedSketchInfo.vertexColl.Add(SketchInfoA.vertexColl[0]);
+
+
+            return conbinedSketchInfo;
+        }
     }
 
     public enum MaskType

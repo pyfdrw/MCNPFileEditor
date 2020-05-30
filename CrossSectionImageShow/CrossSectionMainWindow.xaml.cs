@@ -2456,7 +2456,7 @@ namespace MCNPFileEditor.CrossSectionImageShow
         // 根据所画靶区替换体素
         BackgroundWorker RaplaceBG;
         public List<int> specifiedOrganList = new List<int>(); // 储存需要变换的体素
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void DoVoxel_Button_Click(object sender, RoutedEventArgs e)
         {
             if (selectedPhantom != null && selectedPhantom.SketchCollForAllTransverse != null)
             {
@@ -2507,6 +2507,37 @@ namespace MCNPFileEditor.CrossSectionImageShow
                         && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
                         && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
                     {
+                        // 合并相同Cell index的轮廓
+                        for (int j = 0; j < thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count; j++)
+                        {
+                            if (null != thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j]?.vertexColl)
+                            {
+                                // 查找到相同的项
+                                var searchResult = thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.FirstOrDefault(x =>
+                                    x.cellIndex == thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j].cellIndex &&
+                                    x != thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j]);
+                                if (null == searchResult) // 没找到则该Index的项已经合并完成
+                                    continue;
+
+                                // 合并
+                                thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j] =
+                                    searchResult.CombineTwoSketchInfos(
+                                        thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j],
+                                        searchResult);
+
+                                // 删除被合并的项
+                                thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Remove(searchResult);
+
+                                // 继续查找
+                                j--;
+                            }
+                            else
+                            {
+                                thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.RemoveAt(j);
+                                j--;
+                            }
+                        }
+
                         foreach (var item in thePhantom.SketchCollForAllTransverse[i].sketchInfoColl)
                         {
                             bool[,] SketchTmp = MathFunction.SketchMask(item.vertexColl, thePhantom.RepeatStructureInAPhantom.DimX, thePhantom.RepeatStructureInAPhantom.DimY);
@@ -2590,6 +2621,38 @@ namespace MCNPFileEditor.CrossSectionImageShow
                     && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl != null
                     && thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count >= 1)
                 {
+                    
+                    // 合并相同Cell index的轮廓
+                    for (int j = 0; j < thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Count; j++)
+                    {
+                        if (null != thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j]?.vertexColl)
+                        {
+                            // 查找到相同的项
+                            var searchResult = thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.FirstOrDefault(x =>
+                                x.cellIndex == thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j].cellIndex &&
+                                x != thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j]);
+                            if (null == searchResult) // 没找到则该Index的项已经合并完成
+                                continue;
+
+                            // 合并
+                            thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j] =
+                                searchResult.CombineTwoSketchInfos(
+                                    thePhantom.SketchCollForAllTransverse[i].sketchInfoColl[j],
+                                    searchResult);
+
+                            // 删除被合并的项
+                            thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.Remove(searchResult);
+
+                            // 继续查找
+                            j--;
+                        }
+                        else
+                        {
+                            thePhantom.SketchCollForAllTransverse[i].sketchInfoColl.RemoveAt(j);
+                            j--;
+                        }
+                    }
+
                     foreach (var item in thePhantom.SketchCollForAllTransverse[i].sketchInfoColl)
                     {
                         bool[,] SketchTmp = MathFunction.SketchMask(item.vertexColl, thePhantom.RepeatStructureInAPhantom.DimX, thePhantom.RepeatStructureInAPhantom.DimY);
