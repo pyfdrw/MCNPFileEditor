@@ -636,6 +636,14 @@ namespace MCNPFileEditor.DataClassAndControl
                     int samevoxelcount = 0;
                     string newline = "     ";
 
+                    foreach (var item in CellsCollectionInAPhantom.AllCells)
+                    {
+                        if (item != null)
+                        {
+                            item.NumSum = 0;
+                        }
+                    }
+
                     for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
                     {
                         for (int j = 0; j < RepeatStructureInAPhantom.DimY; j++)
@@ -822,6 +830,14 @@ namespace MCNPFileEditor.DataClassAndControl
                     int lastVoxel = -1;
                     int samevoxelcount = 0;
                     string newline = "     ";
+
+                    foreach (var item in CellsCollectionInAPhantom.AllCells)
+                    {
+                        if (item != null)
+                        {
+                            item.NumSum = 0;
+                        }
+                    }
 
                     for (int i = 0; i < RepeatStructureInAPhantom.DimZ; i++)
                     {
